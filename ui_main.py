@@ -129,11 +129,7 @@ class MainApp(QMainWindow):
             "✈️ Giữ vé": GiuVeWidget()
         }
 
-        icon_map = {
-            "Check PNR": "check.png",
-            "Danh sách PNR": "pnr.png",
-            "Giữ vé": "giu.png"
-        }
+        
 
         for label, widget in self.modules.items():
             #icon_path = icon_map.get(label.replace("🔍 ", "").replace("📄 ", "").replace("✈️ ", ""), "")
