@@ -1,58 +1,118 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
+    QHeaderView, QPushButton, QHBoxLayout, QLineEdit, QMessageBox
+)
 from PyQt5.QtCore import QTimer, Qt
-import random
+
 
 class PNRListWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.data = []
         self.init_ui()
-        self.mock_data()
-        self.setup_auto_update()
 
     def init_ui(self):
-        layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
 
+        # Tiêu đề
         self.title = QLabel("Danh sách PNR")
-        self.title.setStyleSheet("color: white; font-size: 18px; font-weight: bold;")
-        layout.addWidget(self.title)
+        self.title.setStyleSheet("color: #222; font-size: 20px; font-weight: bold;")
+        main_layout.addWidget(self.title)
 
+        # Khu vực nút
+        button_layout = QHBoxLayout()
+
+        self.add_btn = QPushButton("Thêm")
+        self.remove_btn = QPushButton("Xoá")
+        self.check_btn = QPushButton("Check")
+        self.autocheck_btn = QPushButton("AutoCheck")
+        self.minutes_input = QLineEdit()
+        self.minutes_input.setPlaceholderText("Phút...")
+        self.minutes_input.setFixedWidth(80)
+
+        for btn in [self.add_btn, self.remove_btn, self.check_btn, self.autocheck_btn]:
+            btn.setStyleSheet("padding: 6px 12px; font-weight: bold;")
+
+        button_layout.addWidget(self.add_btn)
+        button_layout.addWidget(self.remove_btn)
+        button_layout.addWidget(self.check_btn)
+        button_layout.addWidget(self.autocheck_btn)
+        button_layout.addWidget(self.minutes_input)
+        button_layout.addStretch()
+
+        main_layout.addLayout(button_layout)
+
+        # Bảng PNR
         self.table = QTableWidget()
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["PNR", "Giờ bay", "Ngày bay", "Chiều", "Giá", "Trạng thái"])
+        self.table.setColumnCount(13)
+        self.table.setHorizontalHeaderLabels([
+            "PNR", "Nơi đi", "Nơi đến", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
+            "Giá gốc tổng", "Giá gốc đi", "Giá gốc về",
+            "Giá mới tổng", "Giá mới đi", "Giá mới về"
+        ])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.setStyleSheet("color: white;")
-        layout.addWidget(self.table)
+        self.table.setStyleSheet("font-size: 13px; color: #111;")
+        main_layout.addWidget(self.table)
 
-        self.setLayout(layout)
+        self.setLayout(main_layout)
+
+        # Sự kiện
+        self.add_btn.clicked.connect(self.add_row)
+        self.remove_btn.clicked.connect(self.remove_selected)
+        self.autocheck_btn.clicked.connect(self.setup_auto_check)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.mock_price_update)
+
+        self.mock_data()
+
+    def add_row(self):
+        row_pos = self.table.rowCount()
+        self.table.insertRow(row_pos)
+        for col in range(13):
+            self.table.setItem(row_pos, col, QTableWidgetItem(""))
+
+    def remove_selected(self):
+        selected = self.table.currentRow()
+        if selected >= 0:
+            self.table.removeRow(selected)
+
+    def setup_auto_check(self):
+        try:
+            mins = int(self.minutes_input.text())
+            if mins <= 0:
+                raise ValueError
+            self.timer.start(mins * 60 * 1000)
+            QMessageBox.information(self, "AutoCheck", f"Đã bật auto check mỗi {mins} phút.")
+        except ValueError:
+            QMessageBox.warning(self, "Lỗi", "Số phút không hợp lệ")
+
+    def mock_price_update(self):
+        row_count = self.table.rowCount()
+        for row in range(row_count):
+            try:
+                old_total = int(self.table.item(row, 7).text().replace(",", "").replace(" đ", ""))
+                old_di = int(self.table.item(row, 8).text().replace(",", "").replace(" đ", ""))
+                old_ve = int(self.table.item(row, 9).text().replace(",", "").replace(" đ", ""))
+
+                new_di = max(500000, old_di - 50000)
+                new_ve = max(500000, old_ve - 70000)
+                new_total = new_di + new_ve
+
+                self.table.setItem(row, 10, QTableWidgetItem(f"{new_total:,} đ"))
+                self.table.setItem(row, 11, QTableWidgetItem(f"{new_di:,} đ"))
+                self.table.setItem(row, 12, QTableWidgetItem(f"{new_ve:,} đ"))
+            except:
+                continue
 
     def mock_data(self):
-        self.data = [
-            {"pnr": "ABC123", "gio": "10:00", "ngay": "20/08/2025", "chieu": "HAN-SGN", "gia": 1200000},
-            {"pnr": "DEF456", "gio": "13:30", "ngay": "21/08/2025", "chieu": "SGN-HAN", "gia": 950000},
-            {"pnr": "XYZ789", "gio": "17:15", "ngay": "22/08/2025", "chieu": "DAD-HAN", "gia": 1100000},
+        # Dữ liệu mẫu
+        mock_rows = [
+            ["A21GAF", "HAN", "SGN", "20/08/2025", "22/08/2025", "10:00", "13:00", "2,500,000 đ", "1,200,000 đ", "1,300,000 đ", "", "", ""],
+            ["B33HJK", "SGN", "DAD", "25/08/2025", "28/08/2025", "09:00", "14:00", "2,000,000 đ", "1,000,000 đ", "1,000,000 đ", "", "", ""],
         ]
-        self.refresh_table()
-
-    def refresh_table(self):
-        self.table.setRowCount(len(self.data))
-        for row, item in enumerate(self.data):
-            self.table.setItem(row, 0, QTableWidgetItem(item["pnr"]))
-            self.table.setItem(row, 1, QTableWidgetItem(item["gio"]))
-            self.table.setItem(row, 2, QTableWidgetItem(item["ngay"]))
-            self.table.setItem(row, 3, QTableWidgetItem(item["chieu"]))
-            self.table.setItem(row, 4, QTableWidgetItem(f"{item['gia']:,} đ"))
-            self.table.setItem(row, 5, QTableWidgetItem("✓"))
-
-    def setup_auto_update(self):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.auto_update)
-        self.timer.start(5 * 60 * 1000)  # 5 phút
-
-    def auto_update(self):
-        for item in self.data:
-            # random giảm giá giả lập
-            if random.random() < 0.5:
-                old_price = item['gia']
-                new_price = old_price - random.randint(50000, 200000)
-                item['gia'] = max(500000, new_price)
-        self.refresh_table()
+        for row_data in mock_rows:
+            row_pos = self.table.rowCount()
+            self.table.insertRow(row_pos)
+            for col, val in enumerate(row_data):
+                self.table.setItem(row_pos, col, QTableWidgetItem(val))
