@@ -1,12 +1,41 @@
 import os
 import configparser
+import json
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QPushButton, QLineEdit, QLabel, QCheckBox, QVBoxLayout
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from setting import SettingDialog
+from AddPNRDialog import AddPNRDialog
 class PNRToolbar(QWidget):
     check_clicked = pyqtSignal()
+    def handle_add_clicked(self):
+        
+
+        dialog = AddPNRDialog(self)
+        if dialog.exec_() == dialog.Accepted:
+            new_data = dialog.get_data()
+
+            # Đọc file data.json nếu có, không thì tạo mới
+            if os.path.exists("data.json"):
+                with open("data.json", "r", encoding="utf-8") as f:
+                    try:
+                        data = json.load(f)
+                    except json.JSONDecodeError:
+                        data = []
+            else:
+                data = []
+
+            # Append dữ liệu mới
+            data.append(new_data)
+
+            # Ghi lại file
+            with open("data.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+
+            print("Đã lưu thành công vl 🛫")
+        else:
+            print("Đại ca cancel rồi, không lưu gì hết nha 🛑")
     def open_settings_dialog(self):
         # Load config URL và ID nếu có
         url = self.config.get('API', 'url', fallback='')
@@ -58,6 +87,7 @@ class PNRToolbar(QWidget):
             btn.setFixedHeight(36)
             button_layout.addWidget(btn)
         self.btn_settings.clicked.connect(self.open_settings_dialog)
+        self.btn_add.clicked.connect(self.handle_add_clicked)
         # Hàng AutoCheck
         auto_layout = QHBoxLayout()
         self.toggle_autocheck = QCheckBox("AutoCheck")
