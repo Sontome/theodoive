@@ -1,0 +1,49 @@
+[
+    {
+      "pnr": "A1B2C3",
+      "noidi": "SGN",
+      "noiden": "ICN",
+      "ngaydi": "20/08/2025",
+      "ngayve": "25/08/2025",
+      "giodi": "06:00",
+      "giove": "08:00",
+      "somb": "VJ123",
+      "giatong": "2.000.000",
+      "giadi": "1.000.000",
+      "giave": "1.000.000",
+      "hang": "VJ",
+  
+      "giacu_cunggio_moitong": "1.700.000",
+      "giodi_moi": "06:30",
+      "giove_moi": "08:30",
+      "somb_moi": "VJ234",
+      "giadi_moi": "850.000",
+      "giave_moi": "850.000",
+  
+      "giacu_ngaygan_moitong": "1.600.000",
+      "ngaydi_moi": "21/08/2025",
+      "ngayve_moi": "26/08/2025",
+      "giodi_ngaygan": "07:00",
+      "giove_ngaygan": "09:00",
+      "somb_ngaygan": "VJ345",
+      "giadi_ngaygan": "800.000",
+      "giave_ngaygan": "800.000"
+    },
+    {
+      "pnr": "A1B2C3",
+      "noidi": "SGN",
+      "noiden": "ICN",
+      "ngaydi": "20/08/2025",
+      "ngayve": "25/08/2025",
+      "giodi": "06:00",
+      "giove": "08:00",
+      "somb": "VJ123",
+      "giatong": "2.000.000",
+      "giadi": "1.000.000",
+      "giave": "1.000.000",
+      "hang": "VJ"
+  
+      
+    }
+  ]
+  

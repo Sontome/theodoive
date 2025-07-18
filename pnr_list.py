@@ -1,118 +1,118 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QPushButton, QHBoxLayout, QLineEdit, QMessageBox
+    QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
+    QHeaderView, QSizePolicy
 )
-from PyQt5.QtCore import QTimer, Qt
-
+from PyQt5.QtCore import Qt
+from pnr_toolbar import PNRToolbar 
+import json
+import os
 
 class PNRListWidget(QWidget):
     def __init__(self):
         super().__init__()
-        self.data = []
-        self.init_ui()
+        self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
 
-    def init_ui(self):
-        main_layout = QVBoxLayout(self)
+        self.toolbar = PNRToolbar()
+        self.toolbar.check_clicked.connect(self.refresh)
+        self.layout.addWidget(self.toolbar)
 
-        # Tiêu đề
-        self.title = QLabel("Danh sách PNR")
-        self.title.setStyleSheet("color: #222; font-size: 20px; font-weight: bold;")
-        main_layout.addWidget(self.title)
-
-        # Khu vực nút
-        button_layout = QHBoxLayout()
-
-        self.add_btn = QPushButton("Thêm")
-        self.remove_btn = QPushButton("Xoá")
-        self.check_btn = QPushButton("Check")
-        self.autocheck_btn = QPushButton("AutoCheck")
-        self.minutes_input = QLineEdit()
-        self.minutes_input.setPlaceholderText("Phút...")
-        self.minutes_input.setFixedWidth(80)
-
-        for btn in [self.add_btn, self.remove_btn, self.check_btn, self.autocheck_btn]:
-            btn.setStyleSheet("padding: 6px 12px; font-weight: bold;")
-
-        button_layout.addWidget(self.add_btn)
-        button_layout.addWidget(self.remove_btn)
-        button_layout.addWidget(self.check_btn)
-        button_layout.addWidget(self.autocheck_btn)
-        button_layout.addWidget(self.minutes_input)
-        button_layout.addStretch()
-
-        main_layout.addLayout(button_layout)
-
-        # Bảng PNR
         self.table = QTableWidget()
-        self.table.setColumnCount(13)
-        self.table.setHorizontalHeaderLabels([
-            "PNR", "Nơi đi", "Nơi đến", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
-            "Giá gốc tổng", "Giá gốc đi", "Giá gốc về",
-            "Giá mới tổng", "Giá mới đi", "Giá mới về"
-        ])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.setStyleSheet("font-size: 13px; color: #111;")
-        main_layout.addWidget(self.table)
+        self.layout.addWidget(self.table)
 
-        self.setLayout(main_layout)
+        self.setup_table()
+        self.load_data()
 
-        # Sự kiện
-        self.add_btn.clicked.connect(self.add_row)
-        self.remove_btn.clicked.connect(self.remove_selected)
-        self.autocheck_btn.clicked.connect(self.setup_auto_check)
+    def setup_table(self):
+        self.table.setColumnCount(26)
+        self.table.setRowCount(2)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.mock_price_update)
+        self.table.setSpan(0, 0, 2, 1)       
+        self.table.setSpan(0, 1, 1, 11)      
+        self.table.setSpan(0, 12, 1, 6)      
+        self.table.setSpan(0, 18, 1, 8)      
 
-        self.mock_data()
+        self.table.setItem(0, 0, QTableWidgetItem("PNR"))
+        self.table.setItem(0, 1, QTableWidgetItem("Chuyến gốc"))
+        self.table.setItem(0, 12, QTableWidgetItem("Chuyến cùng ngày mới rẻ hơn"))
+        self.table.setItem(0, 18, QTableWidgetItem("Chuyến gần ngày rẻ hơn"))
 
-    def add_row(self):
-        row_pos = self.table.rowCount()
-        self.table.insertRow(row_pos)
-        for col in range(13):
-            self.table.setItem(row_pos, col, QTableWidgetItem(""))
+        headers_row2 = [
+            "Nơi đi", "Nơi về", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
+            "Số máy bay", "Giá tổng", "Giá đi", "Giá về", "Hãng",
 
-    def remove_selected(self):
-        selected = self.table.currentRow()
-        if selected >= 0:
-            self.table.removeRow(selected)
+            "Giá mới tổng", "Giờ đi", "Giờ về", "Số máy bay", "Giá mới đi", "Giá mới về",
 
-    def setup_auto_check(self):
-        try:
-            mins = int(self.minutes_input.text())
-            if mins <= 0:
-                raise ValueError
-            self.timer.start(mins * 60 * 1000)
-            QMessageBox.information(self, "AutoCheck", f"Đã bật auto check mỗi {mins} phút.")
-        except ValueError:
-            QMessageBox.warning(self, "Lỗi", "Số phút không hợp lệ")
-
-    def mock_price_update(self):
-        row_count = self.table.rowCount()
-        for row in range(row_count):
-            try:
-                old_total = int(self.table.item(row, 7).text().replace(",", "").replace(" đ", ""))
-                old_di = int(self.table.item(row, 8).text().replace(",", "").replace(" đ", ""))
-                old_ve = int(self.table.item(row, 9).text().replace(",", "").replace(" đ", ""))
-
-                new_di = max(500000, old_di - 50000)
-                new_ve = max(500000, old_ve - 70000)
-                new_total = new_di + new_ve
-
-                self.table.setItem(row, 10, QTableWidgetItem(f"{new_total:,} đ"))
-                self.table.setItem(row, 11, QTableWidgetItem(f"{new_di:,} đ"))
-                self.table.setItem(row, 12, QTableWidgetItem(f"{new_ve:,} đ"))
-            except:
-                continue
-
-    def mock_data(self):
-        # Dữ liệu mẫu
-        mock_rows = [
-            ["A21GAF", "HAN", "SGN", "20/08/2025", "22/08/2025", "10:00", "13:00", "2,500,000 đ", "1,200,000 đ", "1,300,000 đ", "", "", ""],
-            ["B33HJK", "SGN", "DAD", "25/08/2025", "28/08/2025", "09:00", "14:00", "2,000,000 đ", "1,000,000 đ", "1,000,000 đ", "", "", ""],
+            "Giá mới tổng", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
+            "Số máy bay", "Giá mới đi", "Giá mới về"
         ]
-        for row_data in mock_rows:
-            row_pos = self.table.rowCount()
-            self.table.insertRow(row_pos)
-            for col, val in enumerate(row_data):
-                self.table.setItem(row_pos, col, QTableWidgetItem(val))
+        for i, text in enumerate(headers_row2, start=1):
+            self.table.setItem(1, i, QTableWidgetItem(text))
+
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.table.setWordWrap(True)
+        self.table.setHorizontalScrollMode(self.table.ScrollPerPixel)
+        self.table.setVerticalScrollMode(self.table.ScrollPerPixel)
+        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.table.setRowHeight(0, 30)
+        self.table.setRowHeight(1, 30)
+
+    def load_data(self):
+        # Xoá dòng cũ trước khi load lại
+        while self.table.rowCount() > 2:
+            self.table.removeRow(2)
+
+        path = os.path.join(os.path.dirname(__file__), 'data.json')
+        if not os.path.exists(path):
+            print("File data.json không tồn tại!")
+            return
+
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print("Lỗi khi đọc file JSON:", e)
+            return
+
+        for item in data:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+
+            # Map field theo đúng thứ tự cột
+            columns = [
+                item.get("pnr", ""),
+                item.get("noidi", ""),
+                item.get("noiden", ""),
+                item.get("ngaydi", ""),
+                item.get("ngayve", ""),
+                item.get("giodi", ""),
+                item.get("giove", ""),
+                item.get("somb", ""),
+                item.get("giatong", ""),
+                item.get("giadi", ""),
+                item.get("giave", ""),
+                item.get("hang", ""),
+
+                item.get("giacu_cunggio_moitong", ""),
+                item.get("giodi_moi", ""),
+                item.get("giove_moi", ""),
+                item.get("somb_moi", ""),
+                item.get("giadi_moi", ""),
+                item.get("giave_moi", ""),
+
+                item.get("giacu_ngaygan_moitong", ""),
+                item.get("ngaydi_moi", ""),
+                item.get("ngayve_moi", ""),
+                item.get("giodi_ngaygan", ""),
+                item.get("giove_ngaygan", ""),
+                item.get("somb_ngaygan", ""),
+                item.get("giadi_ngaygan", ""),
+                item.get("giave_ngaygan", "")
+            ]
+
+            for col, val in enumerate(columns):
+                self.table.setItem(row, col, QTableWidgetItem(str(val)))
+
+    def refresh(self):
+        self.load_data()

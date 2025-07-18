@@ -162,6 +162,10 @@ class MainApp(QMainWindow):
     def switch_module(self, widget):
         index = self.content_layout.indexOf(widget)
         if index != -1:
+            if self.content_layout.currentIndex() == index:
+                return
+            if not hasattr(self, 'original_geometry'):
+                self.original_geometry = self.content_area.geometry()
             anim = QPropertyAnimation(self.content_area, b"geometry")
             anim.setDuration(200)
             anim.setStartValue(QRect(self.content_area.x() + 30, self.content_area.y(), self.content_area.width(), self.content_area.height()))
@@ -175,3 +179,4 @@ if __name__ == "__main__":
     window = MainApp()
     window.show()
     sys.exit(app.exec_())
+  
