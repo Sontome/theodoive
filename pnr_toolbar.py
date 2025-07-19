@@ -2,13 +2,26 @@ import os
 import configparser
 import json
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QPushButton, QLineEdit, QLabel, QCheckBox, QVBoxLayout
+    QWidget, QHBoxLayout, QPushButton, QLineEdit, QLabel,QDialog, QCheckBox, QVBoxLayout,QMessageBox
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from setting import SettingDialog
 from AddPNRDialog import AddPNRDialog
+from DelPNRDialog import DelPNRDialog
+
 class PNRToolbar(QWidget):
     check_clicked = pyqtSignal()
+    def handle_delete_clicked(self):
+        dialog = DelPNRDialog(self)
+        if dialog.exec_() == QDialog.Accepted:
+            pnr, new_data = dialog.get_deleted_data()
+
+            with open("data.json", "w", encoding="utf-8") as f:
+                json.dump(new_data, f, ensure_ascii=False, indent=4)
+
+            QMessageBox.information(self, "Thành công", f"Đã xóa mã {pnr} ✔️")
+        else:
+            print("Đại ca hủy xóa rồi 😅")
     def handle_add_clicked(self):
         
 
@@ -83,9 +96,11 @@ class PNRToolbar(QWidget):
         self.btn_check.setStyleSheet(btn_style)
         self.btn_delete.setStyleSheet(btn_style)
         self.btn_add.setStyleSheet(btn_style)
+
         for btn in [self.btn_add, self.btn_delete, self.btn_check, self.btn_settings]:
             btn.setFixedHeight(36)
             button_layout.addWidget(btn)
+        self.btn_delete.clicked.connect(self.handle_delete_clicked)    
         self.btn_settings.clicked.connect(self.open_settings_dialog)
         self.btn_add.clicked.connect(self.handle_add_clicked)
         # Hàng AutoCheck

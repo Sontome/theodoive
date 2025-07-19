@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import (
     QDialog, QWidget, QFormLayout, QLineEdit, QPushButton,
-    QVBoxLayout, QLabel, QHBoxLayout
+    QVBoxLayout, QLabel, QHBoxLayout,QGraphicsOpacityEffect
 )
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QPropertyAnimation,QPoint,QEasingCurve
 
 class SettingDialog(QDialog):
     def __init__(self, url='', id_text=''):
@@ -25,6 +25,7 @@ class SettingDialog(QDialog):
                 border-radius: 20px;
                 font-family: 'Segoe UI';
                 font-size: 13px;
+                border: 2px solid #ced4da;                           
             }
             QLineEdit {
                 padding: 6px;
@@ -63,7 +64,8 @@ class SettingDialog(QDialog):
                 padding-top: 9px; padding-bottom: 7px;
             }
         """)
-
+        
+        
         # 💡 Tiêu đề
         title_label = QLabel("💡 Nhập thông tin cấu hình")
         title_label.setAlignment(Qt.AlignCenter)
@@ -73,22 +75,23 @@ class SettingDialog(QDialog):
         self.input_url = QLineEdit(url)
         self.input_id = QLineEdit(id_text)
         form_layout = QFormLayout()
-        form_layout.addRow("🔗 URL:", self.input_url)
-        form_layout.addRow("🆔 ID:", self.input_id)
+        form_layout.addRow(" URL API tele:", self.input_url)
+        form_layout.addRow(" ID room tele:", self.input_id)
 
         # 🔘 Nút
-        self.btn_save = QPushButton("💾 Lưu")
+        self.btn_save = QPushButton("Lưu Lại")
         self.btn_save.setObjectName("saveBtn")
         self.btn_save.clicked.connect(self.accept)
 
-        self.btn_cancel = QPushButton("❌ Hủy")
+        self.btn_cancel = QPushButton("Hủy")
         self.btn_cancel.setObjectName("cancelBtn")
         self.btn_cancel.clicked.connect(self.reject)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
-        button_layout.addWidget(self.btn_cancel)
         button_layout.addWidget(self.btn_save)
+        button_layout.addWidget(self.btn_cancel)
+        
 
         # 📦 Layout chính trong widget
         layout = QVBoxLayout(self.main_widget)
@@ -98,6 +101,36 @@ class SettingDialog(QDialog):
         layout.addLayout(form_layout)
         layout.addStretch()
         layout.addLayout(button_layout)
+        self.fade_in_animation()
+        self.slide_in_animation()
+    def slide_in_animation(self):
+        screen_geometry = self.screen().availableGeometry()
+        screen_center = screen_geometry.center()
 
+        # Điểm bắt đầu: ở dưới màn hình
+        start_pos = QPoint(screen_center.x() - self.width() // 2, screen_geometry.bottom())
+        # Điểm kết thúc: ở giữa màn hình
+        end_pos = QPoint(screen_center.x() - self.width() // 2, screen_center.y() - self.height() // 2)
+
+        self.move(start_pos)
+
+        self.anim = QPropertyAnimation(self, b"pos")
+        self.anim.setDuration(600)
+        self.anim.setStartValue(start_pos)
+        self.anim.setEndValue(end_pos)
+        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.anim.start()
+    def fade_in_animation(self):
+        self.effect = QGraphicsOpacityEffect()
+        self.setGraphicsEffect(self.effect)
+        self.fade_anim = QPropertyAnimation(self.effect, b"opacity")
+        self.fade_anim.setDuration(300)
+        self.fade_anim.setStartValue(0.0)
+        self.fade_anim.setEndValue(1.0)
+        self.fade_anim.finished.connect(self.clear_opacity_effect)
+        self.fade_anim.start()
+
+    def clear_opacity_effect(self):
+        self.setGraphicsEffect(None)
     def get_data(self):
         return self.input_url.text().strip(), self.input_id.text().strip()

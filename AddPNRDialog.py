@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QFormLayout, QLineEdit, QLabel,
+    QDialog, QVBoxLayout, QFormLayout, QLineEdit, QLabel,QGraphicsOpacityEffect,
     QPushButton, QHBoxLayout
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QPropertyAnimation,QPoint,QEasingCurve
 
 class AddPNRDialog(QDialog):
     def __init__(self, parent=None):
@@ -88,6 +88,8 @@ class AddPNRDialog(QDialog):
                 background-color: #5a6268;
             }
         """)
+        self.fade_in_animation()
+        self.slide_in_animation()
 
     def get_data(self):
         return {
@@ -104,3 +106,31 @@ class AddPNRDialog(QDialog):
             "giave": self.input_giave.text().strip(),
             "hang": self.input_hang.text().strip()
         }
+    def clear_opacity_effect(self):
+        self.setGraphicsEffect(None)
+    def slide_in_animation(self):
+        screen_geometry = self.screen().availableGeometry()
+        screen_center = screen_geometry.center()
+
+        # Điểm bắt đầu: ở dưới màn hình
+        start_pos = QPoint(screen_center.x() - self.width() // 2, screen_geometry.bottom())
+        # Điểm kết thúc: ở giữa màn hình
+        end_pos = QPoint(screen_center.x() - self.width() // 2, screen_center.y() - self.height() // 2)
+
+        self.move(start_pos)
+
+        self.anim = QPropertyAnimation(self, b"pos")
+        self.anim.setDuration(600)
+        self.anim.setStartValue(start_pos)
+        self.anim.setEndValue(end_pos)
+        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.anim.start()
+    def fade_in_animation(self):
+        self.effect = QGraphicsOpacityEffect()
+        self.setGraphicsEffect(self.effect)
+        self.fade_anim = QPropertyAnimation(self.effect, b"opacity")
+        self.fade_anim.setDuration(300)
+        self.fade_anim.setStartValue(0.0)
+        self.fade_anim.setEndValue(1.0)
+        self.fade_anim.finished.connect(self.clear_opacity_effect)
+        self.fade_anim.start()

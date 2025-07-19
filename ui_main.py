@@ -150,6 +150,11 @@ class MainApp(QMainWindow):
                     background-color: #d1d5db;
                     border-radius: 6px;
                 }
+                QPushButton:pressed {
+                    background-color: #d3e3fd;
+                    border-radius: 6px;
+                }                              
+                              
             """)
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             btn.clicked.connect(lambda checked, w=widget: self.switch_module(w))
