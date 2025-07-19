@@ -58,7 +58,7 @@ class AddPNRDialog(QDialog):
 
         self.setStyleSheet("""
             QDialog {
-                background-color: #f8f9fa;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f4f8, stop:1 #dbeafe);
                 color: #212529;
                 border: 2px solid #ced4da;
                 border-radius: 12px;

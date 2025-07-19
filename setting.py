@@ -21,7 +21,7 @@ class SettingDialog(QDialog):
         self.main_widget.setGeometry(0, 0, 360, 220)
         self.main_widget.setStyleSheet("""
             QWidget#mainWidget {
-                background-color: #ffffff;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f4f8, stop:1 #dbeafe);
                 border-radius: 20px;
                 font-family: 'Segoe UI';
                 font-size: 13px;

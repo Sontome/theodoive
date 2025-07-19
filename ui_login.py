@@ -2,18 +2,20 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLineEdit, QPushButton, QApplication,
     QHBoxLayout, QLabel, QMainWindow
 )
-from PyQt5.QtCore import Qt, QPropertyAnimation, QPoint
+from PyQt5.QtCore import Qt, QPropertyAnimation, QPoint,QUrl
 from PyQt5.QtGui import QPainterPath, QRegion
 from ui_main import MainApp
 import configparser 
-
+from PyQt5.QtMultimedia import QSoundEffect
 class LoginApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(400, 300)
-
+        self.click_sound = QSoundEffect()
+        self.click_sound.setSource(QUrl.fromLocalFile("clicknut.wav"))
+        self.click_sound.setVolume(0.5)
         self.init_ui()
         self.load_username_from_config()
         self.fade_in()
@@ -55,7 +57,7 @@ class LoginApp(QWidget):
                 border: none;
             }
             QPushButton:hover {
-                background-color: #f0f4f8;
+                background-color: #d1d5db;
                 border-radius: 5px;
                 color: black;  
                 font-weight: bold;              
@@ -70,6 +72,10 @@ class LoginApp(QWidget):
         close_btn.clicked.connect(self.close)
         top_bar.addWidget(close_btn)
         layout.addLayout(top_bar)
+        title_label = QLabel("Tool Check Giá")
+        title_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #1e293b;")
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Tên đăng nhập")
@@ -98,7 +104,10 @@ class LoginApp(QWidget):
                 background-color: #5865F2;
             }                    
         """)
-        login_btn.clicked.connect(self.login)
+        def handle_click():
+            self.click_sound.play()  # Phát âm thanh
+            self.login()
+        login_btn.clicked.connect(handle_click)
         layout.addWidget(login_btn)
 
     def input_style(self):
