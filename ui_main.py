@@ -1,15 +1,14 @@
 import sys
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect,QSize
-from PyQt5.QtGui import QColor, QIcon, QFont
+from PyQt5.QtCore import Qt, QPropertyAnimation, QSize, QPoint, QEasingCurve
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QFrame, QLabel, QSizePolicy, QStackedLayout, QGraphicsDropShadowEffect
+    QFrame, QLabel, QSizePolicy, QGraphicsDropShadowEffect
 )
-import os 
+import os
 from check_pnr import CheckPNRWidget
 from giu_ve import GiuVeWidget
 from pnr_list import PNRListWidget
-
 
 class TitleBar(QWidget):
     def __init__(self, parent):
@@ -28,7 +27,6 @@ class TitleBar(QWidget):
         self.title = QLabel("Tool Check Giá")
         self.title.setStyleSheet("color: #111827; font-size: 18px; font-weight: bold;")
         layout.addWidget(self.title)
-
         layout.addStretch()
 
         self.minBtn = QPushButton("—")
@@ -69,7 +67,6 @@ class MainApp(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.wrapper = QWidget()
-        self.wrapper.setObjectName("mainWindow")
         self.setCentralWidget(self.wrapper)
 
         self.main_layout = QVBoxLayout(self.wrapper)
@@ -77,13 +74,14 @@ class MainApp(QMainWindow):
 
         # Shadow
         self.shadow_frame = QFrame()
-        self.shadow_frame.setStyleSheet("border-radius: 15px; background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f4f8, stop:1 #dbeafe);")
+        self.shadow_frame.setStyleSheet(
+            "border-radius: 15px; background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f4f8, stop:1 #dbeafe);"
+        )
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(30)
         shadow.setOffset(0, 0)
         shadow.setColor(QColor(0, 0, 0, 100))
         self.shadow_frame.setGraphicsEffect(shadow)
-
         self.main_layout.addWidget(self.shadow_frame)
 
         self.container_layout = QVBoxLayout(self.shadow_frame)
@@ -109,7 +107,6 @@ class MainApp(QMainWindow):
         self.sidebar_layout = QVBoxLayout(self.sidebar)
         self.sidebar_layout.setContentsMargins(10, 20, 10, 10)
         self.sidebar_layout.setSpacing(15)
-
         self.body.addWidget(self.sidebar)
 
         # Content
@@ -118,24 +115,20 @@ class MainApp(QMainWindow):
             background-color: transparent;
             border-bottom-right-radius: 15px;
         """)
-        self.content_layout = QStackedLayout()
-        self.content_area.setLayout(self.content_layout)
-
+        self.content_layout = QVBoxLayout(self.content_area)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setSpacing(0)
         self.body.addWidget(self.content_area)
 
+        # Modules
         self.modules = {
-            "🔍 Check PNR": CheckPNRWidget(),
-            "📄 Danh sách PNR": PNRListWidget(),
-            "✈️ Giữ vé": GiuVeWidget()
+            "🔍 Check PNR": CheckPNRWidget,
+            "📄 Danh sách PNR": PNRListWidget,
+            "✈️ Giữ vé": GiuVeWidget
         }
 
-        
-
-        for label, widget in self.modules.items():
-            #icon_path = icon_map.get(label.replace("🔍 ", "").replace("📄 ", "").replace("✈️ ", ""), "")
+        for label, widget_class in self.modules.items():
             btn = QPushButton(f"  {label}")
-            #btn.setIcon(QIcon(os.path.join("icons", icon_path)))
-            #btn.setIconSize(QSize(18, 18))
             btn.setStyleSheet("""
                 QPushButton {
                     background: transparent;
@@ -154,34 +147,47 @@ class MainApp(QMainWindow):
                     background-color: #d3e3fd;
                     border-radius: 6px;
                 }                              
-                              
             """)
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            btn.clicked.connect(lambda checked, w=widget: self.switch_module(w))
+            btn.clicked.connect(lambda checked, cls=widget_class: self.switch_module(cls()))
             self.sidebar_layout.addWidget(btn)
-            self.content_layout.addWidget(widget)
 
-        # Load default module
-        self.switch_module(list(self.modules.values())[0])
+        # Load default
+        self.switch_module(CheckPNRWidget())
+
+    def clear_layout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
     def switch_module(self, widget):
-        index = self.content_layout.indexOf(widget)
-        if index != -1:
-            if self.content_layout.currentIndex() == index:
-                return
-            if not hasattr(self, 'original_geometry'):
-                self.original_geometry = self.content_area.geometry()
-            anim = QPropertyAnimation(self.content_area, b"geometry")
-            anim.setDuration(200)
-            anim.setStartValue(QRect(self.content_area.x() + 30, self.content_area.y(), self.content_area.width(), self.content_area.height()))
-            anim.setEndValue(self.content_area.geometry())
-            anim.start()
-            self.content_layout.setCurrentIndex(index)
+        self.clear_layout(self.content_layout)
 
+        # Đặt vị trí bắt đầu (ngoài khung nhìn bên phải)
+        widget.setParent(self.content_area)
+        widget.move(self.content_area.width(), 0)
+        widget.show()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainApp()
-    window.show()
-    sys.exit(app.exec_())
-  
+        self.content_layout.addWidget(widget)
+
+        anim = QPropertyAnimation(widget, b"pos", self)
+        anim.setDuration(800)
+        anim.setStartValue(QPoint(self.content_area.width(), 0))
+        anim.setEndValue(QPoint(0, 0))
+        anim.setEasingCurve(QEasingCurve.OutCubic)
+        anim.start()
+
+    def slide_in_animation(self):
+        screen_geometry = self.screen().availableGeometry()
+        screen_center = screen_geometry.center()
+        start_pos = QPoint(screen_center.x() - self.width() // 2, screen_geometry.bottom())
+        end_pos = QPoint(screen_center.x() - self.width() // 2, screen_center.y() - self.height() // 2)
+
+        self.move(start_pos)
+        self.anim = QPropertyAnimation(self, b"pos")
+        self.anim.setDuration(1000)
+        self.anim.setStartValue(start_pos)
+        self.anim.setEndValue(end_pos)
+        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.anim.start()

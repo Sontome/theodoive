@@ -43,17 +43,18 @@ class AddPNRDialog(QDialog):
 
         # Buttons
         btn_layout = QHBoxLayout()
-        btn_ok = QPushButton("💾 Lưu")
-        btn_cancel = QPushButton("❌ Hủy")
+        btn_ok = QPushButton("Lưu")
+        self.btn_cancel = QPushButton("Hủy")
+        self.btn_cancel.setObjectName("Huy")
         btn_layout.addWidget(btn_ok)
-        btn_layout.addWidget(btn_cancel)
+        btn_layout.addWidget(self.btn_cancel)
 
         # Gộp lại
         main_layout.addLayout(form_layout)
         main_layout.addLayout(btn_layout)
 
         btn_ok.clicked.connect(self.accept)
-        btn_cancel.clicked.connect(self.reject)
+        self.btn_cancel.clicked.connect(self.reject)
 
         self.setStyleSheet("""
             QDialog {
@@ -77,16 +78,30 @@ class AddPNRDialog(QDialog):
             }
 
             QPushButton {
-                font-size: 14px;
-                padding: 6px 12px;
-                background-color: #6c757d;
+                background-color: #00c853;
                 color: white;
-                border-radius: 5px;
+                padding: 6px 12px;
+                border: none;
+                border-radius: 8px;
             }
-
             QPushButton:hover {
-                background-color: #5a6268;
+                background-color: #009624;
             }
+            QPushButton:pressed {
+                background-color: #007e3a;  /* Màu đậm hơn khi nhấn */
+                padding-top: 9px; padding-bottom: 7px; /* Ảo giác nhấn */
+            }   
+            QPushButton#Huy {
+                background-color: #e53935;
+                color: white;
+            }
+            QPushButton#Huy:hover {
+                background-color: #b71c1c;
+            }
+            QPushButton#Huy:pressed {
+                background-color: #8e0000;
+                padding-top: 9px; padding-bottom: 7px;
+            }  
         """)
         self.fade_in_animation()
         self.slide_in_animation()
