@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtCore import Qt, QPropertyAnimation, QSize, QPoint, QEasingCurve
+from PyQt5.QtCore import Qt, QPropertyAnimation, QSize, QPoint, QEasingCurve,QUrl
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -9,10 +9,12 @@ import os
 from check_pnr import CheckPNRWidget
 from giu_ve import GiuVeWidget
 from pnr_list import PNRListWidget
+from PyQt5.QtMultimedia import QSoundEffect
 
 class TitleBar(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
+
         self.parent = parent
         self.setFixedHeight(50)
         self.setStyleSheet("""
@@ -61,6 +63,9 @@ class TitleBar(QWidget):
 class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.click_sound = QSoundEffect()
+        self.click_sound.setSource(QUrl.fromLocalFile("click.wav"))
+        self.click_sound.setVolume(0.5)
         self.setWindowTitle("Tool Check Giá")
         self.setGeometry(200, 100, 1100, 650)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -149,7 +154,12 @@ class MainApp(QMainWindow):
                 }                              
             """)
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            btn.clicked.connect(lambda checked, cls=widget_class: self.switch_module(cls()))
+            def handle_click(cls=widget_class):
+                self.click_sound.play()  # Phát âm thanh
+                self.switch_module(cls())
+            btn.clicked.connect(lambda checked, cls=widget_class: handle_click(cls))
+            
+            
             self.sidebar_layout.addWidget(btn)
         self.fade_in()
         # Load default

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QPropertyAnimation, QPoint
 from PyQt5.QtGui import QPainterPath, QRegion
 from ui_main import MainApp
-
+import configparser 
 
 class LoginApp(QWidget):
     def __init__(self):
@@ -15,10 +15,18 @@ class LoginApp(QWidget):
         self.setFixedSize(400, 300)
 
         self.init_ui()
+        self.load_username_from_config()
         self.fade_in()
 
         self._drag_pos = None  # để kéo cửa sổ
-
+    def load_username_from_config(self):
+        try:
+            config = configparser.ConfigParser()
+            config.read("config.ini")
+            if "LOGIN" in config and "username" in config["LOGIN"]:
+                self.username_input.setText(config["LOGIN"]["username"])
+        except Exception as e:
+            print("Không đọc được username từ config.ini:", e)    
     def init_ui(self):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(10, 10, 10, 10)
