@@ -151,7 +151,7 @@ class MainApp(QMainWindow):
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             btn.clicked.connect(lambda checked, cls=widget_class: self.switch_module(cls()))
             self.sidebar_layout.addWidget(btn)
-
+        self.fade_in()
         # Load default
         self.switch_module(CheckPNRWidget())
 
@@ -178,16 +178,9 @@ class MainApp(QMainWindow):
         anim.setEasingCurve(QEasingCurve.OutCubic)
         anim.start()
 
-    def slide_in_animation(self):
-        screen_geometry = self.screen().availableGeometry()
-        screen_center = screen_geometry.center()
-        start_pos = QPoint(screen_center.x() - self.width() // 2, screen_geometry.bottom())
-        end_pos = QPoint(screen_center.x() - self.width() // 2, screen_center.y() - self.height() // 2)
-
-        self.move(start_pos)
-        self.anim = QPropertyAnimation(self, b"pos")
-        self.anim.setDuration(1000)
-        self.anim.setStartValue(start_pos)
-        self.anim.setEndValue(end_pos)
-        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+    def fade_in(self):
+        self.anim = QPropertyAnimation(self, b"windowOpacity")
+        self.anim.setDuration(600)  # có thể chỉnh chậm nhanh
+        self.anim.setStartValue(0)
+        self.anim.setEndValue(1)
         self.anim.start()

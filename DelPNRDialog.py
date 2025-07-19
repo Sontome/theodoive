@@ -20,6 +20,7 @@ class DelPNRDialog(QDialog):
                 border: 1px solid #ccc;
                 border-radius: 8px;
                 background-color: white;
+                           
                 color: black;
             }
             QComboBox QAbstractItemView {
