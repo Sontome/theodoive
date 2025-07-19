@@ -25,8 +25,9 @@ class LoginApp(QWidget):
 
         self.content = QWidget()
         self.content.setStyleSheet("""
-            background-color: #2f3136;
-            border-radius: 15px;
+            
+            border-radius: 15px; 
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f4f8, stop:1 #dbeafe);
         """)
         self.main_layout.addWidget(self.content)
 
@@ -41,13 +42,21 @@ class LoginApp(QWidget):
         close_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
-                color: white;
+                color: black;
                 font-weight: bold;
                 border: none;
             }
             QPushButton:hover {
-                background-color: #ff4d4f;
+                background-color: #f0f4f8;
                 border-radius: 5px;
+                color: black;  
+                font-weight: bold;              
+            }
+            QPushButton:pressed {
+                background-color: #f9f4f8;
+                border-radius: 5px;
+                color: black;  
+                font-weight: bold;              
             }
         """)
         close_btn.clicked.connect(self.close)
@@ -77,6 +86,9 @@ class LoginApp(QWidget):
             QPushButton:hover {
                 background-color: #4752C4;
             }
+            QPushButton:pressed {
+                background-color: #5865F2;
+            }                    
         """)
         login_btn.clicked.connect(self.login)
         layout.addWidget(login_btn)
@@ -84,11 +96,11 @@ class LoginApp(QWidget):
     def input_style(self):
         return """
             QLineEdit {
-                background-color: #40444b;
+                background-color: #ffffff;
                 border: 1px solid #202225;
                 border-radius: 5px;
                 padding: 8px;
-                color: white;
+                color: black;
             }
             QLineEdit:focus {
                 border: 1px solid #7289da;
@@ -113,8 +125,10 @@ class LoginApp(QWidget):
             # 👉 Mở giao diện chính
             self.main_app = MainApp()
             self.main_app.show()
+            
 
             self.close()  # đóng cửa sổ login
+            
         else:
             self.shake()
 
