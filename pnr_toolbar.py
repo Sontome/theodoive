@@ -83,6 +83,7 @@ class PNRToolbar(QWidget):
         self.thread = CheckPNRThread()
         self.thread.finished.connect(self.check_done)
         self.thread.start()
+
     def check_done(self, message):
         self.btn_check.setEnabled(True)
         self.btn_check.setText("✅ Check")
@@ -96,6 +97,7 @@ class PNRToolbar(QWidget):
         if self.toggle_autocheck.isChecked():
             self.restart_timer()
         self.click_sound.play()
+        self.check_clicked.emit()
     def update_last_update_time(self):
         """Cập nhật thời gian hiện tại vào config và hiển thị"""
         from datetime import datetime
@@ -164,6 +166,7 @@ class PNRToolbar(QWidget):
         self.btn_add.clicked.connect(self.check_clicked.emit)
         self.btn_delete.clicked.connect(self.check_clicked.emit)
         self.btn_check.clicked.connect(self.check_ve_clicked)
+        
         
         # Hàng hiển thị thời gian cập nhật gần nhất
         update_time_layout = QHBoxLayout()

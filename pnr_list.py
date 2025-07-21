@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
     QHeaderView, QSizePolicy
 )
+from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
 from pnr_toolbar import PNRToolbar 
 import json
@@ -112,7 +113,26 @@ class PNRListWidget(QWidget):
             ]
 
             for col, val in enumerate(columns):
-                self.table.setItem(row, col, QTableWidgetItem(str(val)))
+                cell = QTableWidgetItem(str(val))
+
+                # 👉 Check màu cho cột "giacu_cunggio_moitong" (col index 12) so với "giatong" (col index 8)
+                if col == 12:
+                    try:
+                        giacu = float(str(val).replace(",", "").replace(".", ""))
+                        giacu = giacu / 1000 if giacu > 1e6 else giacu
+                        giatong = float(str(item.get("giatong", "0")).replace(",", "").replace(".", ""))
+                        giatong = giatong / 1000 if giatong > 1e6 else giatong
+                        if giacu < giatong:
+                            cell.setBackground(QColor(0, 255, 0, 100))  # xanh lá nhạt
+                        elif giacu == giatong:
+                            cell.setBackground(QColor(200, 200, 200, 100))  # xám nhạt
+                        else:
+                            cell.setBackground(QColor(255, 0, 0, 100))  # đỏ nhạt
+                    except Exception as e:
+                        print("Lỗi so sánh giá:", e)
+
+                self.table.setItem(row, col, cell)
+
 
     def refresh(self):
         self.load_data()

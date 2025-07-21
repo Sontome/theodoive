@@ -40,6 +40,7 @@ class AddPNRDialog(QDialog):
         form_layout.addRow("Giá đi:", self.input_giadi)
         form_layout.addRow("Giá về:", self.input_giave)
         form_layout.addRow("Hãng:", self.input_hang)
+        
 
         # Buttons
         btn_layout = QHBoxLayout()
@@ -124,7 +125,11 @@ class AddPNRDialog(QDialog):
             "giatong": safe_int(self.input_giatong.text().strip()),
             "giadi": safe_int(self.input_giadi.text().strip()),
             "giave": safe_int(self.input_giave.text().strip()),
-            "hang": self.input_hang.text().strip()
+            "hang": self.input_hang.text().strip(),
+            "giacu_cunggio_moitong": 0,
+            
+            "giadi_moi": 0,
+            "giave_moi": 0
         }
     def clear_opacity_effect(self):
         self.setGraphicsEffect(None)
