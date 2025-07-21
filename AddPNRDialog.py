@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLineEdit, QLabel,QGraphicsOpacityEffect,
-    QPushButton, QHBoxLayout
+    QPushButton, QHBoxLayout,QComboBox  ,QDateEdit
 )
-from PyQt5.QtCore import Qt,QPropertyAnimation,QPoint,QEasingCurve
+from PyQt5.QtCore import Qt,QPropertyAnimation,QPoint,QEasingCurve,QDate
 
 class AddPNRDialog(QDialog):
     def __init__(self, parent=None):
@@ -12,20 +12,35 @@ class AddPNRDialog(QDialog):
 
         main_layout = QVBoxLayout(self)
         form_layout = QFormLayout()
-
+        airport_codes = ["ICN", "PUS", "HAN", "SGN", "DAD", "CXR", "VCL", "PQC"]
+        airlines = ["VJ", "VNA"]
         # Tạo input fields
         self.input_pnr = QLineEdit()
-        self.input_noidi = QLineEdit()
-        self.input_noiden = QLineEdit()
-        self.input_ngaydi = QLineEdit()
+        self.input_noidi = QComboBox()
+        self.input_noidi.addItems(airport_codes)
+        self.input_noiden = QComboBox()
+        self.input_noiden.addItems(airport_codes)
+        self.input_noiden.setCurrentText("HAN")
+        self.input_ngaydi = QDateEdit()
+        self.input_ngaydi.setCalendarPopup(True)
+        self.input_ngaydi.setDisplayFormat("dd/MM/yyyy")
+        self.input_ngaydi.setDate(QDate.currentDate())
         self.input_giodi = QLineEdit()
-        self.input_ngayve = QLineEdit()
+        self.input_ngayve = QDateEdit()
+        self.input_ngayve.setCalendarPopup(True)
+        self.input_ngayve.setDisplayFormat("dd/MM/yyyy")
+        self.input_ngayve.setDate(QDate(2000, 1, 1))  # Fake ngày rác
+        self.input_ngayve.setSpecialValueText("")     # Hiện thị rỗng
+        self.input_ngayve.setDateRange(QDate(2000, 1, 1), QDate(2100, 12, 31))
+        self.input_ngayve.setMinimumDate(QDate(2000, 1, 1))  # Cho phép xài ngày "null"
+        self.input_ngayve.clear()  
         self.input_giove = QLineEdit()
         self.input_somb = QLineEdit()
         self.input_giatong = QLineEdit()
         self.input_giadi = QLineEdit()
         self.input_giave = QLineEdit()
-        self.input_hang = QLineEdit()
+        self.input_hang = QComboBox()
+        self.input_hang.addItems(airlines)
 
         # Add fields vào layout
         form_layout.addRow("Mã PNR:", self.input_pnr)
@@ -33,7 +48,7 @@ class AddPNRDialog(QDialog):
         form_layout.addRow("Nơi đến:", self.input_noiden)
         form_layout.addRow("Ngày đi:", self.input_ngaydi)
         form_layout.addRow("Giờ đi:", self.input_giodi)
-        form_layout.addRow("Ngày về:", self.input_ngayve)
+        form_layout.addRow("Ngày về (tuỳ chọn):", self.input_ngayve)
         form_layout.addRow("Giờ về:", self.input_giove)
         form_layout.addRow("Số hiệu bay:", self.input_somb)
         form_layout.addRow("Giá tổng:", self.input_giatong)
@@ -71,7 +86,7 @@ class AddPNRDialog(QDialog):
             }
 
             QLineEdit {
-                font-size: 14px;
+                font-size: 12px;
                 padding: 5px;
                 border: 1px solid #ced4da;
                 border-radius: 5px;
@@ -103,6 +118,49 @@ class AddPNRDialog(QDialog):
                 background-color: #8e0000;
                 padding-top: 9px; padding-bottom: 7px;
             }  
+            QComboBox {
+                font-size: 12px;
+                padding: 5px;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+                background-color: #ffffff;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #ffffff;
+                selection-background-color: #dbeafe;
+                color: #000000;
+                border-radius: 5px
+            } 
+            QDateEdit {
+                font-size: 12px;
+                padding: 5px;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+                background-color: #ffffff;
+            }
+            QCalendarWidget QToolButton {
+                height: 24px;
+                width: 80px;
+                color: #ffffff;
+                font-weight: bold;
+                background-color: transparent;
+            }
+            QCalendarWidget QMenu {
+                background-color: #ffffff;
+            }
+            QCalendarWidget QSpinBox {
+                width: 40px;
+            }
+            QCalendarWidget QWidget {
+                alternate-background-color: #ffffff;
+            }
+            QCalendarWidget QAbstractItemView:enabled {
+                font-size: 10px;
+                color: black;
+                background-color: #ffffff;
+                selection-background-color: #ffffff;
+                selection-color: ffffff;
+            }                             
         """)
         self.fade_in_animation()
         self.slide_in_animation()
@@ -115,17 +173,17 @@ class AddPNRDialog(QDialog):
                 return 0
         return {
             "pnr": self.input_pnr.text().strip(),
-            "noidi": self.input_noidi.text().strip(),
-            "noiden": self.input_noiden.text().strip(),
-            "ngaydi": self.input_ngaydi.text().strip(),
-            "ngayve": self.input_ngayve.text().strip(),
+            "noidi": self.input_noidi.currentText().strip(),
+            "noiden": self.input_noiden.currentText().strip(),
+            "ngaydi": self.input_ngaydi.date().toString("dd/MM/yyyy"),
+            "ngayve": self.input_ngayve.date().toString("dd/MM/yyyy") if self.input_ngayve.date() != QDate(2000, 1, 1) else "",
             "giodi": self.input_giodi.text().strip(),
             "giove": self.input_giove.text().strip(),
             "somb": self.input_somb.text().strip(),
             "giatong": safe_int(self.input_giatong.text().strip()),
             "giadi": safe_int(self.input_giadi.text().strip()),
             "giave": safe_int(self.input_giave.text().strip()),
-            "hang": self.input_hang.text().strip(),
+            "hang": self.input_hang.currentText().strip(),
             "giacu_cunggio_moitong": 0,
             
             "giadi_moi": 0,

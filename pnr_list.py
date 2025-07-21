@@ -145,7 +145,12 @@ class PNRListWidget(QWidget):
                             cell.setBackground(QColor(255, 0, 0, 100))  # đỏ nhạt
                     except Exception as e:
                         print("Lỗi so sánh giá:", e)
-
+                if col == 0:
+                    hang = item.get("hang", "").upper()
+                    if hang == "VJ":
+                        cell.setBackground(QColor(216, 19, 39, 150))  # đỏ nhạt
+                    elif hang == "VNA":
+                        cell.setBackground(QColor(65, 139, 179, 150))  # xanh dương nhạt
                 self.table.setItem(row, col, cell)
 
 
