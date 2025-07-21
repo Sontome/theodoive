@@ -6,8 +6,23 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
 from pnr_toolbar import PNRToolbar 
 import json
-import os
+import os,sys
+def get_user_data_path(filename):
+    """Lưu file cấu hình/data trong cùng thư mục với .exe hoặc file .py"""
+    if getattr(sys, 'frozen', False):
+        # Nếu chạy từ file .exe (frozen = True)
+        return os.path.join(os.path.dirname(sys.executable), filename)
+    else:
+        # Khi chạy file .py
+        return os.path.join(os.path.dirname(__file__), filename)
+def resource_path(relative_path):
+    """Lấy path chuẩn cho file resource (dùng được cả khi run .py và khi đã build .exe)"""
+    try:
+        base_path = sys._MEIPASS  # Khi chạy từ .exe
+    except AttributeError:
+        base_path = os.path.abspath(".")  # Khi chạy từ source .py
 
+    return os.path.join(base_path, relative_path)
 class PNRListWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -64,13 +79,13 @@ class PNRListWidget(QWidget):
         while self.table.rowCount() > 2:
             self.table.removeRow(2)
 
-        path = os.path.join(os.path.dirname(__file__), 'data.json')
-        if not os.path.exists(path):
+        
+        if not os.path.exists(get_user_data_path("data.json")):
             print("File data.json không tồn tại!")
             return
-
+        
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(get_user_data_path("data.json"), 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except Exception as e:
             print("Lỗi khi đọc file JSON:", e)

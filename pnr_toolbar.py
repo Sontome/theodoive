@@ -1,4 +1,4 @@
-import os
+import os,sys
 import configparser
 import json
 from PyQt5.QtWidgets import (
@@ -10,6 +10,22 @@ from AddPNRDialog import AddPNRDialog
 from DelPNRDialog import DelPNRDialog
 from PyQt5.QtMultimedia import QSoundEffect
 from check import check_all_pnrs
+def get_user_data_path(filename):
+    """Lưu file cấu hình/data trong cùng thư mục với .exe hoặc file .py"""
+    if getattr(sys, 'frozen', False):
+        # Nếu chạy từ file .exe (frozen = True)
+        return os.path.join(os.path.dirname(sys.executable), filename)
+    else:
+        # Khi chạy file .py
+        return os.path.join(os.path.dirname(__file__), filename)
+def resource_path(relative_path):
+    """Lấy path chuẩn cho file resource (dùng được cả khi run .py và khi đã build .exe)"""
+    try:
+        base_path = sys._MEIPASS  # Khi chạy từ .exe
+    except AttributeError:
+        base_path = os.path.abspath(".")  # Khi chạy từ source .py
+
+    return os.path.join(base_path, relative_path)
 class CheckPNRThread(QThread):
     finished = pyqtSignal(str)  # Trả kết quả dạng string
 
@@ -20,13 +36,15 @@ class CheckPNRThread(QThread):
         
 class PNRToolbar(QWidget):
     check_clicked = pyqtSignal()
+    
     def handle_delete_clicked(self):
+        
         self.btn_sound.play()
         dialog = DelPNRDialog(self)
         if dialog.exec_() == QDialog.Accepted:
             pnr, new_data = dialog.get_deleted_data()
 
-            with open("data.json", "w", encoding="utf-8") as f:
+            with open(get_user_data_path("data.json"), "w", encoding="utf-8") as f:
                 json.dump(new_data, f, ensure_ascii=False, indent=4)
 
             
@@ -38,10 +56,11 @@ class PNRToolbar(QWidget):
         dialog = AddPNRDialog(self)
         if dialog.exec_() == dialog.Accepted:
             new_data = dialog.get_data()
+            
 
             # Đọc file data.json nếu có, không thì tạo mới
-            if os.path.exists("data.json"):
-                with open("data.json", "r", encoding="utf-8") as f:
+            if os.path.exists(get_user_data_path("data.json")):
+                with open(get_user_data_path("data.json"), "r", encoding="utf-8") as f:
                     try:
                         data = json.load(f)
                     except json.JSONDecodeError:
@@ -53,7 +72,7 @@ class PNRToolbar(QWidget):
             data.append(new_data)
 
             # Ghi lại file
-            with open("data.json", "w", encoding="utf-8") as f:
+            with open(get_user_data_path("data.json"), "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
 
             print("Đã lưu thành công vl 🛫")
@@ -73,7 +92,7 @@ class PNRToolbar(QWidget):
             self.config.set('API', 'url', new_url)
             self.config.set('API', 'id', new_id)
 
-            with open(self.config_path, 'w') as configfile:
+            with open(get_user_data_path("config.ini"), 'w') as configfile:
                 self.config.write(configfile)
     def check_ve_clicked(self):
         self.btn_sound.play()

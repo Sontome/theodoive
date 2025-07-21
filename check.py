@@ -74,7 +74,7 @@ def check_all_pnrs(data_file="data.json"):
                 
                 if giờ_đi_chiều_đi == "" or giacu =="" or giacu == 0:
                     item["giodi"]= result.get("chiều_đi","").get("giờ_cất_cánh","")
-                    if giờ_đi_chiều_về:
+                    if depdate1:
                         item["giove"]= result.get("chiều_về",{}).get("giờ_cất_cánh","")
                         item["giave"]= result.get("chiều_về",{}).get("giá_vé_gốc",0)
                     item["somb"]= ""
@@ -85,7 +85,7 @@ def check_all_pnrs(data_file="data.json"):
                 else  :
                     item["giacu_cunggio_moitong"] = result.get("thông_tin_chung","").get("giá_vé",0)
                     item["giodi_moi"] = result.get("chiều_đi","").get("giờ_cất_cánh","")
-                    if giờ_đi_chiều_về:
+                    if depdate1:
                         item["giove_moi"] = result.get("chiều_về",{}).get("giờ_cất_cánh","")
                         item["giave_moi"] = result.get("chiều_về",{}).get("giá_vé_gốc","")
                     item["somb_moi"] = ""

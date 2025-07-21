@@ -4,8 +4,23 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QPropertyAnimation,QPoint,QEasingCurve
 import json
-import os
+import os,sys
+def get_user_data_path(filename):
+    """Lưu file cấu hình/data trong cùng thư mục với .exe hoặc file .py"""
+    if getattr(sys, 'frozen', False):
+        # Nếu chạy từ file .exe (frozen = True)
+        return os.path.join(os.path.dirname(sys.executable), filename)
+    else:
+        # Khi chạy file .py
+        return os.path.join(os.path.dirname(__file__), filename)
+def resource_path(relative_path):
+    """Lấy path chuẩn cho file resource (dùng được cả khi run .py và khi đã build .exe)"""
+    try:
+        base_path = sys._MEIPASS  # Khi chạy từ .exe
+    except AttributeError:
+        base_path = os.path.abspath(".")  # Khi chạy từ source .py
 
+    return os.path.join(base_path, relative_path)
 class DelPNRDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -144,11 +159,13 @@ class DelPNRDialog(QDialog):
             QMessageBox.warning(self, "Lỗi", "Vui lòng chọn mã PNR cần xóa.")
             return
         self.accept()
+   
     def load_data(self):
-        if not os.path.exists("data.json"):
+        if not os.path.exists(get_user_data_path("data.json")):
             return []
+        
 
-        with open("data.json", "r", encoding="utf-8") as f:
+        with open(get_user_data_path("data.json"), "r", encoding="utf-8") as f:
             try:
                 return json.load(f)
             except json.JSONDecodeError:
