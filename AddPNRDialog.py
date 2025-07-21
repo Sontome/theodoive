@@ -1,9 +1,29 @@
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLineEdit, QLabel,QGraphicsOpacityEffect,
-    QPushButton, QHBoxLayout,QComboBox  ,QDateEdit
+    QPushButton, QHBoxLayout,QComboBox  ,QDateEdit,QCalendarWidget,QWidget
 )
 from PyQt5.QtCore import Qt,QPropertyAnimation,QPoint,QEasingCurve,QDate
+class CalendarLineEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setPlaceholderText("Chọn ngày")
 
+        # Tạo lịch nhưng ẩn
+        self.calendar = QCalendarWidget()
+        self.calendar.setWindowFlags(Qt.Popup)  # Cho popup như kiểu dropdown
+        self.calendar.clicked.connect(self.set_date_from_calendar)
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+
+        # Tính vị trí popup dưới lineedit
+        pos = self.mapToGlobal(QPoint(0, self.height()))
+        self.calendar.move(pos)
+        self.calendar.show()
+
+    def set_date_from_calendar(self, date: QDate):
+        self.setText(date.toString("dd/MM/yyyy"))
+        self.calendar.hide()
 class AddPNRDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -21,19 +41,10 @@ class AddPNRDialog(QDialog):
         self.input_noiden = QComboBox()
         self.input_noiden.addItems(airport_codes)
         self.input_noiden.setCurrentText("HAN")
-        self.input_ngaydi = QDateEdit()
-        self.input_ngaydi.setCalendarPopup(True)
-        self.input_ngaydi.setDisplayFormat("dd/MM/yyyy")
-        self.input_ngaydi.setDate(QDate.currentDate())
+        self.input_ngaydi = CalendarLineEdit()
+        
         self.input_giodi = QLineEdit()
-        self.input_ngayve = QDateEdit()
-        self.input_ngayve.setCalendarPopup(True)
-        self.input_ngayve.setDisplayFormat("dd/MM/yyyy")
-        self.input_ngayve.setDate(QDate(2000, 1, 1))  # Fake ngày rác
-        self.input_ngayve.setSpecialValueText("")     # Hiện thị rỗng
-        self.input_ngayve.setDateRange(QDate(2000, 1, 1), QDate(2100, 12, 31))
-        self.input_ngayve.setMinimumDate(QDate(2000, 1, 1))  # Cho phép xài ngày "null"
-        self.input_ngayve.clear()  
+        self.input_ngayve = CalendarLineEdit()
         self.input_giove = QLineEdit()
         self.input_somb = QLineEdit()
         self.input_giatong = QLineEdit()
@@ -171,12 +182,16 @@ class AddPNRDialog(QDialog):
                 return int(text.replace(",", "").strip())
             except:
                 return 0
+        text_ngaydi = self.input_ngaydi.text().strip()
+        ngaydi = QDate.fromString(text_ngaydi, "dd/MM/yyyy") if text_ngaydi else None
+        text_ngayve = self.input_ngayve.text().strip()
+        ngayve = QDate.fromString(text_ngayve, "dd/MM/yyyy") if text_ngayve else None
         return {
             "pnr": self.input_pnr.text().strip(),
             "noidi": self.input_noidi.currentText().strip(),
             "noiden": self.input_noiden.currentText().strip(),
-            "ngaydi": self.input_ngaydi.date().toString("dd/MM/yyyy"),
-            "ngayve": self.input_ngayve.date().toString("dd/MM/yyyy") if self.input_ngayve.date() != QDate(2000, 1, 1) else "",
+            "ngaydi": ngaydi.toString("dd/MM/yyyy") if ngaydi and ngaydi.isValid() else None,
+            "ngayve": ngayve.toString("dd/MM/yyyy") if ngayve and ngayve.isValid() else None,
             "giodi": self.input_giodi.text().strip(),
             "giove": self.input_giove.text().strip(),
             "somb": self.input_somb.text().strip(),
