@@ -23,6 +23,7 @@ def check_all_pnrs(data_file="data.json"):
     datanew = []
     for item in data:
         try:
+            hang=item.get("hang", "")
             giờ_đi_chiều_đi = item.get("giodi", "")
             giờ_đi_chiều_về = item.get("giove", "")
             depdate0 = convert_date_format(item.get("ngaydi", ""))
@@ -45,12 +46,37 @@ def check_all_pnrs(data_file="data.json"):
                 "sochieu": sochieu
                 
             }
-            
-            res = requests.post("https://thuhongtour.com/vj/check-ve-v2", json=payload, timeout=10)
-            
+            payloadvna = {
+                
+                "dep0": dep0,
+                "arr0": arr0,
+                "depdate0": depdate0,
+                "depdate1": depdate1,
+                "activedVia": "0,1,2",
+                "activedIDT": "ADT,VFR",
+                "adt": "1",
+                "chd": "0",
+                "inf": "0",
+                "page": "1",
+                "sochieu": sochieu,
+                "filterTimeSlideMin0": "5",
+                "filterTimeSlideMax0": "2355",
+                "filterTimeSlideMin1": "5",
+                "filterTimeSlideMax1": "2355",
+                "session_key": ""
+                
+            }
+            urlvj = "https://thuhongtour.com/vj/check-ve-v2"
+            urlvna = "https://thuhongtour.com/vna/check-ve-v2"
+            if hang == "VJ":
+                res = requests.post(urlvj, json=payload, timeout=10)
+                print(payload)
+            else :
+                res = requests.post(urlvna, json=payloadvna, timeout=25)
+                print(payloadvna)
             if res.ok:
                 ress = res.json()
-                print (item)
+                #print (item)
                 
                 listchuyenbay = ress.get("body",[])
                 print (listchuyenbay)
@@ -76,20 +102,20 @@ def check_all_pnrs(data_file="data.json"):
                     item["giodi"]= result.get("chiều_đi","").get("giờ_cất_cánh","")
                     if depdate1:
                         item["giove"]= result.get("chiều_về",{}).get("giờ_cất_cánh","")
-                        item["giave"]= result.get("chiều_về",{}).get("giá_vé_gốc",0)
+                        #item["giave"]= result.get("chiều_về",{}).get("giá_vé_gốc",0)
                     item["somb"]= ""
                     item["giatong"]= result.get("thông_tin_chung",{}).get("giá_vé",0)
-                    item["giadi"]= result.get("chiều_đi",{}).get("giá_vé_gốc",0)
+                    #item["giadi"]= result.get("chiều_đi",{}).get("giá_vé_gốc",0)
                     
-                    item["hang"]= "VJ"
+                    item["hang"]= hang
                 else  :
                     item["giacu_cunggio_moitong"] = result.get("thông_tin_chung","").get("giá_vé",0)
                     item["giodi_moi"] = result.get("chiều_đi","").get("giờ_cất_cánh","")
                     if depdate1:
                         item["giove_moi"] = result.get("chiều_về",{}).get("giờ_cất_cánh","")
-                        item["giave_moi"] = result.get("chiều_về",{}).get("giá_vé_gốc","")
+                        #item["giave_moi"] = result.get("chiều_về",{}).get("giá_vé_gốc","")
                     item["somb_moi"] = ""
-                    item["giadi_moi"] = result.get("chiều_đi","").get("giá_vé_gốc","")
+                    #item["giadi_moi"] = result.get("chiều_đi","").get("giá_vé_gốc","")
                     
                    
 
@@ -101,7 +127,7 @@ def check_all_pnrs(data_file="data.json"):
                 datanew.append(item)
             print (item)
         except Exception as e:
-            
+            datanew.append(item)
             result_lines.append(f'❌ {item.get("pnr")} -> Lỗi: {e}')
     with open("data.json", "w", encoding="utf-8") as f:
                 json.dump(datanew, f, ensure_ascii=False, indent=4)

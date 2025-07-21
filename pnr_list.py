@@ -44,23 +44,23 @@ class PNRListWidget(QWidget):
         self.table.setRowCount(2)
 
         self.table.setSpan(0, 0, 2, 1)       
-        self.table.setSpan(0, 1, 1, 11)      
-        self.table.setSpan(0, 12, 1, 6)      
-        self.table.setSpan(0, 18, 1, 8)      
+        self.table.setSpan(0, 1, 1, 9)      
+        self.table.setSpan(0, 10, 1, 4)      
+        self.table.setSpan(0, 14, 1, 6)      
 
         self.table.setItem(0, 0, QTableWidgetItem("PNR"))
         self.table.setItem(0, 1, QTableWidgetItem("Chuyến gốc"))
-        self.table.setItem(0, 12, QTableWidgetItem("Chuyến cùng ngày mới rẻ hơn"))
-        self.table.setItem(0, 18, QTableWidgetItem("Chuyến gần ngày rẻ hơn"))
+        self.table.setItem(0, 10, QTableWidgetItem("Chuyến cùng ngày mới rẻ hơn"))
+        self.table.setItem(0, 14, QTableWidgetItem("Chuyến gần ngày rẻ hơn"))
 
         headers_row2 = [
             "Nơi đi", "Nơi về", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
-            "Số máy bay", "Giá tổng", "Giá đi", "Giá về", "Hãng",
+            "Số máy bay", "Giá tổng", "Hãng",
 
-            "Giá mới tổng", "Giờ đi", "Giờ về", "Số máy bay", "Giá mới đi", "Giá mới về",
+            "Giá mới tổng", "Giờ đi", "Giờ về", "Số máy bay",
 
             "Giá mới tổng", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
-            "Số máy bay", "Giá mới đi", "Giá mới về"
+            "Số máy bay"
         ]
         for i, text in enumerate(headers_row2, start=1):
             self.table.setItem(1, i, QTableWidgetItem(text))
@@ -106,32 +106,29 @@ class PNRListWidget(QWidget):
                 item.get("giove", ""),
                 item.get("somb", ""),
                 item.get("giatong", ""),
-                item.get("giadi", ""),
-                item.get("giave", ""),
+                
                 item.get("hang", ""),
 
                 item.get("giacu_cunggio_moitong", ""),
                 item.get("giodi_moi", ""),
                 item.get("giove_moi", ""),
                 item.get("somb_moi", ""),
-                item.get("giadi_moi", ""),
-                item.get("giave_moi", ""),
+                
 
                 item.get("giacu_ngaygan_moitong", ""),
                 item.get("ngaydi_moi", ""),
                 item.get("ngayve_moi", ""),
                 item.get("giodi_ngaygan", ""),
                 item.get("giove_ngaygan", ""),
-                item.get("somb_ngaygan", ""),
-                item.get("giadi_ngaygan", ""),
-                item.get("giave_ngaygan", "")
+                item.get("somb_ngaygan", "")
+               
             ]
 
             for col, val in enumerate(columns):
                 cell = QTableWidgetItem(str(val))
 
                 # 👉 Check màu cho cột "giacu_cunggio_moitong" (col index 12) so với "giatong" (col index 8)
-                if col == 12:
+                if col == 10:
                     try:
                         giacu = float(str(val).replace(",", "").replace(".", ""))
                         giacu = giacu / 1000 if giacu > 1e6 else giacu
