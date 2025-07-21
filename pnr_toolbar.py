@@ -68,10 +68,35 @@ class PNRToolbar(QWidget):
     def check_ve_clicked(self):
         result = check_all_pnrs()
         
+        # Cập nhật thời gian sau khi check xong
+        self.update_last_update_time()
+        
         # Chuyển đổi list thành string
         message= "Xong"
         
         QMessageBox.information(self, "Kết quả check PNR", message)
+    
+    def update_last_update_time(self):
+        """Cập nhật thời gian hiện tại vào config và hiển thị"""
+        from datetime import datetime
+        current_time = datetime.now().strftime("%H:%M")
+        
+        if not self.config.has_section('UPDATETIME'):
+            self.config.add_section('UPDATETIME')
+        
+        self.config.set('UPDATETIME', 'time', current_time)
+        
+        with open(self.config_path, 'w') as configfile:
+            self.config.write(configfile)
+        
+        # Cập nhật label hiển thị
+        self.label_last_update.setText(f"🕐 Cập nhật lần cuối: {current_time}")
+    
+    def load_last_update_time(self):
+        """Đọc thời gian cập nhật gần nhất từ config"""
+        last_time = self.config.get('UPDATETIME', 'time', fallback='--:--')
+        self.label_last_update.setText(f"🕐 Cập nhật lần cuối: {last_time}")
+
     def __init__(self):
         super().__init__()
         self.config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -114,6 +139,14 @@ class PNRToolbar(QWidget):
         self.btn_add.clicked.connect(self.check_clicked.emit)
         self.btn_delete.clicked.connect(self.check_clicked.emit)
         self.btn_check.clicked.connect(self.check_ve_clicked)
+        
+        # Hàng hiển thị thời gian cập nhật gần nhất
+        update_time_layout = QHBoxLayout()
+        self.label_last_update = QLabel("🕐 Cập nhật lần cuối: --:--")
+        self.label_last_update.setStyleSheet("font-weight: bold; color: #1976d2;")
+        update_time_layout.addWidget(self.label_last_update)
+        update_time_layout.addStretch()
+        
         # Hàng AutoCheck
         auto_layout = QHBoxLayout()
         self.toggle_autocheck = QCheckBox("AutoCheck")
@@ -148,6 +181,7 @@ class PNRToolbar(QWidget):
         auto_layout.addStretch()
 
         main_layout.addLayout(button_layout)
+        main_layout.addLayout(update_time_layout)  # Thêm layout hiển thị thời gian
         main_layout.addLayout(auto_layout)
 
         self.timer = QTimer()
@@ -185,6 +219,8 @@ class PNRToolbar(QWidget):
         else:
             self.timer.stop()
             self.label_countdown.setText("⏳ Đang xử lý...")
+            # Khi timer hết, tự động check và cập nhật thời gian
+            self.check_ve_clicked()
             self.restart_timer()
 
     def restart_timer(self):
@@ -203,6 +239,10 @@ class PNRToolbar(QWidget):
                 'enabled': 'false',
                 'minutes': '5'
             }
+            # Tạo section UPDATETIME mặc định
+            self.config['UPDATETIME'] = {
+                'time': '--:--'
+            }
             with open(self.config_path, 'w') as configfile:
                 self.config.write(configfile)
 
@@ -212,6 +252,9 @@ class PNRToolbar(QWidget):
 
         self.toggle_autocheck.setChecked(enabled)
         self.input_minutes.setText(str(minutes))
+
+        # Load thời gian cập nhật gần nhất
+        self.load_last_update_time()
 
         # Nếu enable thì khởi động lại
         if enabled:
