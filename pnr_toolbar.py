@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from setting import SettingDialog
 from AddPNRDialog import AddPNRDialog
 from DelPNRDialog import DelPNRDialog
+from check import check_all_pnrs
 
 class PNRToolbar(QWidget):
     check_clicked = pyqtSignal()
@@ -19,7 +20,7 @@ class PNRToolbar(QWidget):
             with open("data.json", "w", encoding="utf-8") as f:
                 json.dump(new_data, f, ensure_ascii=False, indent=4)
 
-            QMessageBox.information(self, "Thành công", f"Đã xóa mã {pnr} ✔️")
+            
         else:
             print("Đại ca hủy xóa rồi 😅")
     def handle_add_clicked(self):
@@ -64,6 +65,13 @@ class PNRToolbar(QWidget):
 
             with open(self.config_path, 'w') as configfile:
                 self.config.write(configfile)
+    def check_ve_clicked(self):
+        result = check_all_pnrs()
+        
+        # Chuyển đổi list thành string
+        message= "Xong"
+        
+        QMessageBox.information(self, "Kết quả check PNR", message)
     def __init__(self):
         super().__init__()
         self.config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -103,6 +111,9 @@ class PNRToolbar(QWidget):
         self.btn_delete.clicked.connect(self.handle_delete_clicked)    
         self.btn_settings.clicked.connect(self.open_settings_dialog)
         self.btn_add.clicked.connect(self.handle_add_clicked)
+        self.btn_add.clicked.connect(self.check_clicked.emit)
+        self.btn_delete.clicked.connect(self.check_clicked.emit)
+        self.btn_check.clicked.connect(self.check_ve_clicked)
         # Hàng AutoCheck
         auto_layout = QHBoxLayout()
         self.toggle_autocheck = QCheckBox("AutoCheck")

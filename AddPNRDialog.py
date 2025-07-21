@@ -107,6 +107,11 @@ class AddPNRDialog(QDialog):
         self.slide_in_animation()
 
     def get_data(self):
+        def safe_int(text):
+            try:
+                return int(text.replace(",", "").strip())
+            except:
+                return 0
         return {
             "pnr": self.input_pnr.text().strip(),
             "noidi": self.input_noidi.text().strip(),
@@ -116,9 +121,9 @@ class AddPNRDialog(QDialog):
             "giodi": self.input_giodi.text().strip(),
             "giove": self.input_giove.text().strip(),
             "somb": self.input_somb.text().strip(),
-            "giatong": self.input_giatong.text().strip(),
-            "giadi": self.input_giadi.text().strip(),
-            "giave": self.input_giave.text().strip(),
+            "giatong": safe_int(self.input_giatong.text().strip()),
+            "giadi": safe_int(self.input_giadi.text().strip()),
+            "giave": safe_int(self.input_giave.text().strip()),
             "hang": self.input_hang.text().strip()
         }
     def clear_opacity_effect(self):
