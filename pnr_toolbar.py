@@ -4,15 +4,24 @@ import json
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QPushButton, QLineEdit, QLabel,QDialog, QCheckBox, QVBoxLayout,QMessageBox
 )
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal,QThread,QUrl
 from setting import SettingDialog
 from AddPNRDialog import AddPNRDialog
 from DelPNRDialog import DelPNRDialog
+from PyQt5.QtMultimedia import QSoundEffect
 from check import check_all_pnrs
+class CheckPNRThread(QThread):
+    finished = pyqtSignal(str)  # Trả kết quả dạng string
 
+    def run(self):
+        from check import check_all_pnrs
+        check_all_pnrs()  # chạy hàm chính
+        self.finished.emit("✅ Check xong rồi đại ca!")
+        
 class PNRToolbar(QWidget):
     check_clicked = pyqtSignal()
     def handle_delete_clicked(self):
+        self.btn_sound.play()
         dialog = DelPNRDialog(self)
         if dialog.exec_() == QDialog.Accepted:
             pnr, new_data = dialog.get_deleted_data()
@@ -24,7 +33,7 @@ class PNRToolbar(QWidget):
         else:
             print("Đại ca hủy xóa rồi 😅")
     def handle_add_clicked(self):
-        
+        self.btn_sound.play()
 
         dialog = AddPNRDialog(self)
         if dialog.exec_() == dialog.Accepted:
@@ -51,6 +60,7 @@ class PNRToolbar(QWidget):
         else:
             print("Đại ca cancel rồi, không lưu gì hết nha 🛑")
     def open_settings_dialog(self):
+        self.btn_sound.play()
         # Load config URL và ID nếu có
         url = self.config.get('API', 'url', fallback='')
         id_text = self.config.get('API', 'id', fallback='')
@@ -66,16 +76,26 @@ class PNRToolbar(QWidget):
             with open(self.config_path, 'w') as configfile:
                 self.config.write(configfile)
     def check_ve_clicked(self):
-        result = check_all_pnrs()
-        
+        self.btn_sound.play()
+        self.btn_check.setEnabled(False)
+        self.btn_check.setText("⏳ Đang check...")
+
+        self.thread = CheckPNRThread()
+        self.thread.finished.connect(self.check_done)
+        self.thread.start()
+    def check_done(self, message):
+        self.btn_check.setEnabled(True)
+        self.btn_check.setText("✅ Check")
+
         # Cập nhật thời gian sau khi check xong
         self.update_last_update_time()
+
         
-        # Chuyển đổi list thành string
-        message= "Xong"
-        
-        QMessageBox.information(self, "Kết quả check PNR", message)
-    
+
+        # Nếu đang auto-check thì khởi động lại timer
+        if self.toggle_autocheck.isChecked():
+            self.restart_timer()
+        self.click_sound.play()
     def update_last_update_time(self):
         """Cập nhật thời gian hiện tại vào config và hiển thị"""
         from datetime import datetime
@@ -101,7 +121,12 @@ class PNRToolbar(QWidget):
         super().__init__()
         self.config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
         self.config = configparser.ConfigParser()
-
+        self.click_sound = QSoundEffect()
+        self.click_sound.setSource(QUrl.fromLocalFile("ding.wav"))
+        self.click_sound.setVolume(1)
+        self.btn_sound = QSoundEffect()
+        self.btn_sound.setSource(QUrl.fromLocalFile("clicknut.wav"))
+        self.btn_sound.setVolume(1)
         # Layout chính
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
