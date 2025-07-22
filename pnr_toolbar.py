@@ -145,7 +145,8 @@ class PNRToolbar(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+        
+        self.config_path = get_user_data_path("config.ini")
         self.config = configparser.ConfigParser()
         self.click_sound = QSoundEffect()
         self.click_sound.setSource(QUrl.fromLocalFile("ding.wav"))
