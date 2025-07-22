@@ -135,7 +135,7 @@ class PNRListWidget(QWidget):
                         giatong = item.get("giacu_cunggio_moitong", 10000000)
                         if giatong == 0 :
                             giatong = 10000000
-                        print (giacu,giatong)
+                        #print (giacu,giatong)
                         if int(giacu) > int(giatong):
                             cell.setBackground(QColor(0, 255, 0, 100))  # xanh lá nhạt
                         elif int(giacu) == int(giatong):

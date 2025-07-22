@@ -81,7 +81,7 @@ def check_all_pnrs(data_file="data.json"):
                 listchuyenbay = ress.get("body",[])
                 #print (listchuyenbay)
                 result = loc_chuyen_bay_theo_gio(listchuyenbay,giờ_đi_chiều_đi,giờ_đi_chiều_về)
-                print(result) 
+                #print(result) 
                 
                 if result == None:
                     result = listchuyenbay[0]  
@@ -129,7 +129,7 @@ def check_all_pnrs(data_file="data.json"):
             else:
                 result_lines.append(res.status_code)
                 datanew.append(item)
-            print (item)
+            #print (item)
         except Exception as e:
             datanew.append(item)
             result_lines.append(f'❌ {item.get("pnr")} -> Lỗi: {e}')
@@ -168,7 +168,7 @@ def loc_chuyen_bay_theo_gio(list_danh_sach, gio_di_chieu_di, gio_di_chieu_ve="")
             #print (gio_di_chieu_di,gio_di_chieu_ve,gio_cat_canh_chieu_di,gio_cat_canh_chieu_ve)
             if (gio_cat_canh_chieu_di == gio_di_chieu_di and gio_cat_canh_chieu_ve == gio_di_chieu_ve):
                 result= chuyen_bay
-                print("có chuyến cùng giờ")
+                #print("có chuyến cùng giờ")
                 break
     return result
     

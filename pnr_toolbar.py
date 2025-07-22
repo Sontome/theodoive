@@ -10,6 +10,7 @@ from AddPNRDialog import AddPNRDialog
 from DelPNRDialog import DelPNRDialog
 from PyQt5.QtMultimedia import QSoundEffect
 from check import check_all_pnrs
+from pushnoti import PushNotiTelegram
 def get_user_data_path(filename):
     """Lưu file cấu hình/data trong cùng thư mục với .exe hoặc file .py"""
     if getattr(sys, 'frozen', False):
@@ -117,6 +118,10 @@ class PNRToolbar(QWidget):
             self.restart_timer()
         self.click_sound.play()
         self.check_clicked.emit()
+        url = self.config.get('API', 'url', fallback='')
+        id_text = self.config.get('API', 'id', fallback='')
+        if url and id_text:
+            PushNotiTelegram(url, id_text).push_from_data()
     def update_last_update_time(self):
         """Cập nhật thời gian hiện tại vào config và hiển thị"""
         from datetime import datetime
