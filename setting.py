@@ -75,7 +75,7 @@ class SettingDialog(QDialog):
         self.input_url = QLineEdit(url)
         self.input_id = QLineEdit(id_text)
         form_layout = QFormLayout()
-        form_layout.addRow(" URL API tele:", self.input_url)
+        form_layout.addRow(" TokenBot:", self.input_url)
         form_layout.addRow(" ID room tele:", self.input_id)
 
         # 🔘 Nút
