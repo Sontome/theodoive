@@ -133,6 +133,8 @@ class PNRListWidget(QWidget):
                         giacu = item.get("giatong", 0)
                         
                         giatong = item.get("giacu_cunggio_moitong", 10000000)
+                        if giatong == 0 :
+                            giatong = 10000000
                         print (giacu,giatong)
                         if int(giacu) > int(giatong):
                             cell.setBackground(QColor(0, 255, 0, 100))  # xanh lá nhạt
@@ -149,6 +151,38 @@ class PNRListWidget(QWidget):
                     elif hang == "VNA":
                         cell.setBackground(QColor(65, 139, 179, 150))  # xanh dương nhạt
                 self.table.setItem(row, col, cell)
+                if col == 11 :
+                    giacu = item.get("giatong", 0)
+                    giodi =   item.get("giodi", "")
+                    giove = item.get("giove", "")
+                    giodimoi =   item.get("giodi_moi", "")
+                    giovemoi = item.get("giove_moi", "")
+                    giatong = item.get("giacu_cunggio_moitong", 10000000)
+                    if giatong == 0 :
+                        giatong = 10000000
+                    if int(giacu) > int(giatong):
+                        if giodi == giodimoi:
+                            cell.setBackground(QColor(0, 255, 0, 100)) 
+                        else :
+                            cell.setBackground(QColor(255, 0, 0, 100))
+                    else:
+                        cell.setBackground(QColor(200, 200, 200, 100))  # xám nhạt
+                if col == 12 :
+                    giacu = item.get("giatong", 0)
+                    giodi =   item.get("giodi", "")
+                    giove = item.get("giove", "")
+                    giodimoi =   item.get("giodi_moi", "")
+                    giovemoi = item.get("giove_moi", "")
+                    giatong = item.get("giacu_cunggio_moitong", 10000000)
+                    if giatong == 0 :
+                        giatong = 10000000
+                    if int(giacu) > int(giatong):
+                        if giove == giovemoi:
+                            cell.setBackground(QColor(0, 255, 0, 100)) 
+                        else :
+                            cell.setBackground(QColor(255, 0, 0, 100))
+                    else:
+                        cell.setBackground(QColor(200, 200, 200, 100))  # xám nhạt
 
 
     def refresh(self):
