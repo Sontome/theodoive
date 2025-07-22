@@ -70,30 +70,34 @@ def check_all_pnrs(data_file="data.json"):
             urlvna = "https://thuhongtour.com/vna/check-ve-v2"
             if hang == "VJ":
                 res = requests.post(urlvj, json=payload, timeout=10)
-                print(payload)
+                #print(payload)
             else :
                 res = requests.post(urlvna, json=payloadvna, timeout=25)
-                print(payloadvna)
+                #print(payloadvna)
             if res.ok:
                 ress = res.json()
                 #print (item)
                 
                 listchuyenbay = ress.get("body",[])
-                print (listchuyenbay)
+                #print (listchuyenbay)
                 result = loc_chuyen_bay_theo_gio(listchuyenbay,giờ_đi_chiều_đi,giờ_đi_chiều_về)
-                #print(result)
+                print(result) 
+                
                 if result == None:
                     result = listchuyenbay[0]  
-                print(result)  
+                #print(result)  
                 giacu= item.get("giatong",0)
-                print(giacu)
+                #print(giacu)
                 giamoi = result.get("thông_tin_chung","").get("giá_vé",0)
                 
                 
                 if result == None or int(giamoi) >= int(giacu) :
-                    result = listchuyenbay[0]
+
+                    result1 = listchuyenbay[0]
                     
-                    giamoi = result.get("thông_tin_chung","").get("giá_vé",0)
+                    giamoi_0 = result1.get("thông_tin_chung","").get("giá_vé",0)
+                    if int(giamoi_0) < int(giacu):
+                        result = listchuyenbay[0]
                     
                 
                 result_lines.append(result)
@@ -148,7 +152,7 @@ def loc_chuyen_bay_theo_gio(list_danh_sach, gio_di_chieu_di, gio_di_chieu_ve="")
         list: Danh sách các chuyến bay khớp điều kiện
     """
     
-    
+    result= None
     for chuyen_bay in list_danh_sach:
         gio_cat_canh_chieu_ve =""
         # Kiểm tra xem chuyến bay có đủ thông tin chiều đi và chiều về không
@@ -160,12 +164,11 @@ def loc_chuyen_bay_theo_gio(list_danh_sach, gio_di_chieu_di, gio_di_chieu_ve="")
             #print(chuyen_bay)
             # So sánh với điều kiện lọc
             print (gio_di_chieu_di,gio_di_chieu_ve,gio_cat_canh_chieu_di,gio_cat_canh_chieu_ve)
-            if (gio_cat_canh_chieu_di == gio_di_chieu_di and 
-                gio_cat_canh_chieu_ve == gio_di_chieu_ve):
-                
-                
-                return chuyen_bay
-            return None
+            if (gio_cat_canh_chieu_di == gio_di_chieu_di and gio_cat_canh_chieu_ve == gio_di_chieu_ve):
+                result= chuyen_bay
+                print("có chuyến cùng giờ")
+                break
+    return result
     
     
 def loc_chuyen_bay_theo_ngay(list_danh_sach):

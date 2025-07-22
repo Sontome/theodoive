@@ -99,7 +99,7 @@ class DelPNRDialog(QDialog):
 
         self.combo = QComboBox()
         self.data = self.load_data()
-        print("DATA ĐÃ LOAD:", self.data)
+        #print("DATA ĐÃ LOAD:", self.data)
         if not self.data:
             QMessageBox.information(self, "Thông báo", "Không có PNR nào để xóa.")
             self.reject()

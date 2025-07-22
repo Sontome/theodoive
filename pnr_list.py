@@ -130,13 +130,13 @@ class PNRListWidget(QWidget):
                 # 👉 Check màu cho cột "giacu_cunggio_moitong" (col index 12) so với "giatong" (col index 8)
                 if col == 10:
                     try:
-                        giacu = float(str(val).replace(",", "").replace(".", ""))
-                        giacu = giacu / 1000 if giacu > 1e6 else giacu
-                        giatong = float(str(item.get("giatong", "0")).replace(",", "").replace(".", ""))
-                        giatong = giatong / 1000 if giatong > 1e6 else giatong
-                        if giacu < giatong:
+                        giacu = item.get("giatong", 0)
+                        
+                        giatong = item.get("giacu_cunggio_moitong", 10000000)
+                        print (giacu,giatong)
+                        if int(giacu) > int(giatong):
                             cell.setBackground(QColor(0, 255, 0, 100))  # xanh lá nhạt
-                        elif giacu == giatong:
+                        elif int(giacu) == int(giatong):
                             cell.setBackground(QColor(200, 200, 200, 100))  # xám nhạt
                         else:
                             cell.setBackground(QColor(255, 0, 0, 100))  # đỏ nhạt
