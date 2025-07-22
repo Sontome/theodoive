@@ -191,7 +191,7 @@ class AddPNRDialog(QDialog):
             "noidi": self.input_noidi.currentText().strip(),
             "noiden": self.input_noiden.currentText().strip(),
             "ngaydi": ngaydi.toString("dd/MM/yyyy") if ngaydi and ngaydi.isValid() else None,
-            "ngayve": ngayve.toString("dd/MM/yyyy") if ngayve and ngayve.isValid() else None,
+            "ngayve": ngayve.toString("dd/MM/yyyy") if ngayve and ngayve.isValid() else "",
             "giodi": self.input_giodi.text().strip(),
             "giove": self.input_giove.text().strip(),
             "somb": self.input_somb.text().strip(),

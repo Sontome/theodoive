@@ -160,10 +160,12 @@ def loc_chuyen_bay_theo_gio(list_danh_sach, gio_di_chieu_di, gio_di_chieu_ve="")
             # Lấy giờ cất cánh chiều đi và chiều về
             gio_cat_canh_chieu_di = chuyen_bay['chiều_đi'].get('giờ_cất_cánh', '')
             if "chiều_về" in chuyen_bay:
-                gio_cat_canh_chieu_ve = chuyen_bay['chiều_về'].get('giờ_cất_cánh', '')
+                gio_cat_canh_chieu_ve = chuyen_bay['chiều_về'].get('giờ_cất_cánh', "")
+            else:
+                gio_cat_canh_chieu_ve = ""
             #print(chuyen_bay)
             # So sánh với điều kiện lọc
-            print (gio_di_chieu_di,gio_di_chieu_ve,gio_cat_canh_chieu_di,gio_cat_canh_chieu_ve)
+            #print (gio_di_chieu_di,gio_di_chieu_ve,gio_cat_canh_chieu_di,gio_cat_canh_chieu_ve)
             if (gio_cat_canh_chieu_di == gio_di_chieu_di and gio_cat_canh_chieu_ve == gio_di_chieu_ve):
                 result= chuyen_bay
                 print("có chuyến cùng giờ")
