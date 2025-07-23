@@ -6,8 +6,64 @@ from PyQt5.QtCore import Qt, QPropertyAnimation, QPoint,QUrl
 from PyQt5.QtGui import QPainterPath, QRegion
 from ui_main import MainApp
 import configparser 
+from datetime import datetime
+import os,sys
 from PyQt5.QtMultimedia import QSoundEffect
+def get_user_data_path(filename):
+        """Lấy đường dẫn file khi chạy dạng .py hoặc đã build .exe"""
+        if getattr(sys, 'frozen', False):
+            return os.path.join(os.path.dirname(sys.executable), filename)
+        else:
+            return os.path.join(os.path.dirname(__file__), filename)
+
 class LoginApp(QWidget):
+    
+
+    def check_and_clear_data_if_expired(self):
+        config_path = get_user_data_path("config.ini")
+        data_path = get_user_data_path("data.json")
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        
+        config = configparser.ConfigParser()
+
+        # 🔧 Nếu chưa có config.ini thì tạo mặc định
+        if not os.path.exists(config_path):
+            config["AutoCheck"] = {"enabled": "true", "minutes": "5"}
+            config["API"] = {"url": "7359295123:AAGz0rHge3L5gM-XJmyzNq6sayULdHO4-qE", "id": ""}
+            config["LOGIN"] = {"username": "1"}
+            config["UPDATETIME"] = {"time": "13:52"}
+            config["DATA"] = {"daydate": today_str}  # Set today là mặc định
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                config.write(f)
+            print("⚙️ Đã tạo file config.ini mặc định")
+            return
+
+        # ✅ Đọc config hiện có
+        config.read(config_path)
+
+        try:
+            if "DATA" not in config:
+                config["DATA"] = {}
+
+            daydate_str = config["DATA"].get("daydate", today_str)  # Nếu không có thì set today
+            daydate = datetime.strptime(daydate_str, "%Y-%m-%d").date()
+            today = datetime.now().date()
+
+            if daydate < today:
+                # 🧨 Xoá file data.json nếu có
+                if os.path.exists(data_path):
+                    os.remove(data_path)
+                    print("💥 Đã xoá file data.json vì quá hạn")
+
+                # ✍️ Cập nhật lại ngày mới vào config.ini
+                config["DATA"]["daydate"] = today_str
+                with open(config_path, "w", encoding="utf-8") as f:
+                    config.write(f)
+                print("🔄 Đã cập nhật daydate mới vào config.ini")
+
+        except Exception as e:
+            print("❌ Lỗi xử lý config/data:", e)
     def __init__(self):
         super().__init__()
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -19,6 +75,7 @@ class LoginApp(QWidget):
         self.init_ui()
         self.load_username_from_config()
         self.fade_in()
+        self.check_and_clear_data_if_expired()
 
         self._drag_pos = None  # để kéo cửa sổ
     def load_username_from_config(self):
