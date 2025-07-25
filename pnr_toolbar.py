@@ -137,7 +137,35 @@ class PNRToolbar(QWidget):
         
         # Cập nhật label hiển thị
         self.label_last_update.setText(f"🕐 Cập nhật lần cuối: {current_time}")
-    
+    def load_notify_config(self):
+    # Đọc lại toàn bộ config để đảm bảo không mất section nào
+        self.config.read(self.config_path)
+
+        if not self.config.has_section('NOTIFY'):
+            self.config.add_section('NOTIFY')
+            self.config.set('NOTIFY', 'same_hour', 'true')
+            self.config.set('NOTIFY', 'diff_hour', 'true')
+            self.config.set('NOTIFY', 'diff_day', 'true')
+            with open(self.config_path, 'w') as configfile:
+                self.config.write(configfile)
+
+        self.chk_same_hour.setChecked(self.config.getboolean('NOTIFY', 'same_hour', fallback=True))
+        self.chk_diff_hour.setChecked(self.config.getboolean('NOTIFY', 'diff_hour', fallback=True))
+        self.chk_diff_day.setChecked(self.config.getboolean('NOTIFY', 'diff_day', fallback=True))
+
+    def save_notify_config(self):
+        # Đọc lại toàn bộ config để giữ nguyên các section khác
+        self.config.read(self.config_path)
+
+        if not self.config.has_section('NOTIFY'):
+            self.config.add_section('NOTIFY')
+
+        self.config.set('NOTIFY', 'same_hour', str(self.chk_same_hour.isChecked()).lower())
+        self.config.set('NOTIFY', 'diff_hour', str(self.chk_diff_hour.isChecked()).lower())
+        self.config.set('NOTIFY', 'diff_day', str(self.chk_diff_day.isChecked()).lower())
+
+        with open(self.config_path, 'w') as configfile:
+            self.config.write(configfile)
     def load_last_update_time(self):
         """Đọc thời gian cập nhật gần nhất từ config"""
         last_time = self.config.get('UPDATETIME', 'time', fallback='--:--')
@@ -236,6 +264,20 @@ class PNRToolbar(QWidget):
         main_layout.addLayout(button_layout)
         main_layout.addLayout(update_time_layout)  # Thêm layout hiển thị thời gian
         main_layout.addLayout(auto_layout)
+        notify_layout = QHBoxLayout()
+        self.chk_same_hour = QCheckBox("Thông báo cùng giờ")
+        self.chk_diff_hour = QCheckBox("Thông báo khác giờ")
+        self.chk_diff_day = QCheckBox("Thông báo khác ngày")
+
+        for chk in [self.chk_same_hour, self.chk_diff_hour, self.chk_diff_day]:
+            chk.stateChanged.connect(self.save_notify_config)
+            notify_layout.addWidget(chk)
+
+        notify_layout.addStretch()
+        main_layout.addLayout(notify_layout)
+
+        # Load trạng thái checkbox từ config
+        self.load_notify_config()
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_countdown)
