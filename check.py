@@ -52,7 +52,7 @@ def check_all_pnrs(data_file="data.json"):
                 "arr0": arr0,
                 "depdate0": depdate0,
                 "depdate1": depdate1,
-                "activedVia": "0,1,2",
+                "activedVia": "0",
                 "activedIDT": "ADT,VFR",
                 "adt": "1",
                 "chd": "0",
@@ -70,15 +70,27 @@ def check_all_pnrs(data_file="data.json"):
             urlvna = "https://thuhongtour.com/vna/check-ve-v2"
             if hang == "VJ":
                 res = requests.post(urlvj, json=payload, timeout=10)
+                if res.ok:
+                    ress = res.json()
+                    #print (item)
+                    
+                    listchuyenbay = ress.get("body",[])
                 #print(payload)
             else :
                 res = requests.post(urlvna, json=payloadvna, timeout=25)
-                #print(payloadvna)
+                if res.ok:
+                    ress = res.json()
+                    #print (item)
+                    ve_vfr = [ve for ve in ress["body"] if ve["thông_tin_chung"]["hành_lý_vna"] == "VFR"]
+                    ve_adt = [ve for ve in ress["body"] if ve["thông_tin_chung"]["hành_lý_vna"] == "ADT"]
+
+                    # Ưu tiên lấy vé VFR, nếu không có thì lấy ADT
+                    ve_chon = ve_vfr if ve_vfr else ve_adt
+                    listchuyenbay = ve_chon
             if res.ok:
-                ress = res.json()
-                #print (item)
-                
-                listchuyenbay = ress.get("body",[])
+
+                #print(payloadvna)
+            
                 #print (listchuyenbay)
                 result = loc_chuyen_bay_theo_gio(listchuyenbay,giờ_đi_chiều_đi,giờ_đi_chiều_về)
                 #print(result) 
@@ -107,7 +119,7 @@ def check_all_pnrs(data_file="data.json"):
                     if depdate1:
                         item["giove"]= result.get("chiều_về",{}).get("giờ_cất_cánh","")
                         #item["giave"]= result.get("chiều_về",{}).get("giá_vé_gốc",0)
-                    item["somb"]= ""
+                    item["hanh_ly"]= result.get("thông_tin_chung",{}).get("hành_lý_vna","")
                     item["giatong"]= result.get("thông_tin_chung",{}).get("giá_vé",0)
                     #item["giadi"]= result.get("chiều_đi",{}).get("giá_vé_gốc",0)
                     
@@ -119,6 +131,7 @@ def check_all_pnrs(data_file="data.json"):
                         item["giove_moi"] = result.get("chiều_về",{}).get("giờ_cất_cánh","")
                         #item["giave_moi"] = result.get("chiều_về",{}).get("giá_vé_gốc","")
                     item["somb_moi"] = ""
+                    item["hanh_ly_moi"] = result.get("thông_tin_chung",{}).get("hành_lý_vna","")
                     #item["giadi_moi"] = result.get("chiều_đi","").get("giá_vé_gốc","")
                     
                    

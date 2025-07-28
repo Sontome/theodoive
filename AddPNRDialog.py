@@ -61,7 +61,7 @@ class AddPNRDialog(QDialog):
         form_layout.addRow("Giờ đi:", self.input_giodi)
         form_layout.addRow("Ngày về (tuỳ chọn):", self.input_ngayve)
         form_layout.addRow("Giờ về:", self.input_giove)
-        form_layout.addRow("Số hiệu bay:", self.input_somb)
+        form_layout.addRow("Hành lý:", self.input_somb)
         form_layout.addRow("Giá tổng:", self.input_giatong)
         form_layout.addRow("Giá đi:", self.input_giadi)
         form_layout.addRow("Giá về:", self.input_giave)
@@ -194,7 +194,7 @@ class AddPNRDialog(QDialog):
             "ngayve": ngayve.toString("dd/MM/yyyy") if ngayve and ngayve.isValid() else "",
             "giodi": self.input_giodi.text().strip(),
             "giove": self.input_giove.text().strip(),
-            "somb": self.input_somb.text().strip(),
+            "hanh_ly": self.input_somb.text().strip(),
             "giatong": safe_int(self.input_giatong.text().strip()),
             "giadi": safe_int(self.input_giadi.text().strip()),
             "giave": safe_int(self.input_giave.text().strip()),

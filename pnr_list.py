@@ -55,9 +55,9 @@ class PNRListWidget(QWidget):
 
         headers_row2 = [
             "Nơi đi", "Nơi về", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
-            "Số máy bay", "Giá tổng", "Hãng",
+            "Hành lý", "Giá tổng", "Hãng",
 
-            "Giá mới tổng", "Giờ đi", "Giờ về", "Số máy bay",
+            "Giá mới tổng", "Giờ đi", "Giờ về", "Hành lý",
 
             "Giá mới tổng", "Ngày đi", "Ngày về", "Giờ đi", "Giờ về",
             "Số máy bay"
@@ -104,7 +104,7 @@ class PNRListWidget(QWidget):
                 item.get("ngayve", ""),
                 item.get("giodi", ""),
                 item.get("giove", ""),
-                item.get("somb", ""),
+                item.get("hanh_ly", ""),
                 item.get("giatong", ""),
                 
                 item.get("hang", ""),
@@ -112,7 +112,7 @@ class PNRListWidget(QWidget):
                 item.get("giacu_cunggio_moitong", ""),
                 item.get("giodi_moi", ""),
                 item.get("giove_moi", ""),
-                item.get("somb_moi", ""),
+                item.get("hanh_ly_moi", ""),
                 
 
                 item.get("giacu_ngaygan_moitong", ""),
