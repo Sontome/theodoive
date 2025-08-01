@@ -163,7 +163,7 @@ class MainApp(QMainWindow):
             self.sidebar_layout.addWidget(btn)
         self.fade_in()
         # Load default
-        self.switch_module(CheckPNRWidget())
+        self.switch_module(PNRListWidget())
 
     def clear_layout(self, layout):
         while layout.count():
