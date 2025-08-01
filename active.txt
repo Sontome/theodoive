@@ -1,3 +1,9 @@
 run SQL active user 
 
+
+https://supabase.com/dashboard/project/jamuzjjhjpotnxttzkyf/sql/95e07978-01d0-4b34-925f-b83d008f1318
+
+
+lệnh
+
 update public.users set status = 'active' where username = 'username';
