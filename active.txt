@@ -1,0 +1,3 @@
+run SQL active user 
+
+update public.users set status = 'active' where username = 'username';
