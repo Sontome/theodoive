@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLineEdit, QPushButton, QApplication,
-    QHBoxLayout, QLabel, QMainWindow
+    QHBoxLayout, QLabel, QMainWindow,QMessageBox
 )
 from PyQt5.QtCore import Qt, QPropertyAnimation, QPoint,QUrl
 from PyQt5.QtGui import QPainterPath, QRegion
@@ -9,6 +9,11 @@ import configparser
 from datetime import datetime
 import os,sys
 from PyQt5.QtMultimedia import QSoundEffect
+from supabase_helper import create_account, check_login
+
+
+
+
 def get_user_data_path(filename):
         """Lấy đường dẫn file khi chạy dạng .py hoặc đã build .exe"""
         if getattr(sys, 'frozen', False):
@@ -18,6 +23,19 @@ def get_user_data_path(filename):
 
 class LoginApp(QWidget):
     
+    def handle_register(self):
+        username = self.username_input.text()
+        password = self.password_input.text()
+
+        if not username or not password:
+            QMessageBox.warning(self, "Thiếu thông tin", "Vui lòng nhập đầy đủ tài khoản và mật khẩu.")
+            return
+
+        success, message = create_account(username, password)
+        if success:
+            QMessageBox.information(self, "Thành công", message)
+        else:
+            QMessageBox.critical(self, "Thất bại", message)
 
     def check_and_clear_data_if_expired(self):
         config_path = get_user_data_path("config.ini")
@@ -161,11 +179,30 @@ class LoginApp(QWidget):
                 background-color: #5865F2;
             }                    
         """)
+        register_btn = QPushButton("Tạo tài khoản")
+        register_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #10b981;
+                color: white;
+                border-radius: 5px;
+                padding: 8px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #059669;
+            }
+            QPushButton:pressed {
+                background-color: #10b981;
+            }                    
+        """)
+        register_btn.clicked.connect(self.handle_register)
+        
         def handle_click():
             self.click_sound.play()  # Phát âm thanh
             self.login()
         login_btn.clicked.connect(handle_click)
         layout.addWidget(login_btn)
+        layout.addWidget(register_btn)
 
     def input_style(self):
         return """
@@ -193,17 +230,14 @@ class LoginApp(QWidget):
     def login(self):
         user = self.username_input.text()
         pw = self.password_input.text()
-        if user == "1" and pw == "1":
-            print("Login thành công")
-
-            # 👉 Mở giao diện chính
+        
+        if check_login(user, pw):
+            print("✅ Đăng nhập thành công")
             self.main_app = MainApp()
             self.main_app.show()
-            
-
-            self.close()  # đóng cửa sổ login
-            
+            self.close()
         else:
+            print("❌ Sai tài khoản hoặc mật khẩu")
             self.shake()
 
     def shake(self):
