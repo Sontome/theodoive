@@ -91,4 +91,4 @@ class PushNotiTelegram:
             print(message)
             self.send(message)
         else:
-            self.send("Đã Update giá mới nhất, chưa phát hiện chuyến rẻ hơn")
+            print("chưa có chuyến rẻ hơn")
